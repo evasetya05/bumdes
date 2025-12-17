@@ -1,0 +1,145 @@
+{% extends 'dashboard/base.html' %}
+{% load i18n %}
+
+{% block title %}{% if object %}Edit Anggota{% else %}Tambah Anggota{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    {% if object %}Edit Anggota{% else %}Tambah Anggota Baru{% endif %}
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="id_nik" class="form-label">NIK <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control {% if form.nik.errors %}is-invalid{% endif %}"
+                                       id="id_nik" name="nik" value="{{ form.nik.value|default:'' }}"
+                                       maxlength="16" pattern="[0-9]{16}" required>
+                                {% if form.nik.errors %}
+                                    <div class="invalid-feedback">{{ form.nik.errors.0 }}</div>
+                                {% endif %}
+                                <div class="form-text">16 digit nomor NIK</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="id_rt" class="form-label">RT <span class="text-danger">*</span></label>
+                                {{ form.rt }}
+                                {% if form.rt.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.rt.errors.0 }}</div>
+                                {% else %}
+                                    <div class="form-text">Pilih RT, RW, dan Dusun secara otomatis akan terisi.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="id_nama_lengkap" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control {% if form.nama_lengkap.errors %}is-invalid{% endif %}"
+                               id="id_nama_lengkap" name="nama_lengkap" value="{{ form.nama_lengkap.value|default:'' }}" required>
+                        {% if form.nama_lengkap.errors %}
+                            <div class="invalid-feedback">{{ form.nama_lengkap.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="id_jenis_kelamin" class="form-label">Jenis Kelamin <span class="text-danger">*</span></label>
+                                <select class="form-select {% if form.jenis_kelamin.errors %}is-invalid{% endif %}"
+                                        id="id_jenis_kelamin" name="jenis_kelamin" required>
+                                    <option value="">-- Pilih Jenis Kelamin --</option>
+                                    <option value="L" {% if form.jenis_kelamin.value == 'L' %}selected{% endif %}>Laki-laki</option>
+                                    <option value="P" {% if form.jenis_kelamin.value == 'P' %}selected{% endif %}>Perempuan</option>
+                                </select>
+                                {% if form.jenis_kelamin.errors %}
+                                    <div class="invalid-feedback">{{ form.jenis_kelamin.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="id_no_hp" class="form-label">Nomor HP</label>
+                                <input type="text" class="form-control {% if form.no_hp.errors %}is-invalid{% endif %}"
+                                       id="id_no_hp" name="no_hp" value="{{ form.no_hp.value|default:'' }}"
+                                       maxlength="20">
+                                {% if form.no_hp.errors %}
+                                    <div class="invalid-feedback">{{ form.no_hp.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="id_email" class="form-label">Email</label>
+                        <input type="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                               id="id_email" name="email" value="{{ form.email.value|default:'' }}">
+                        {% if form.email.errors %}
+                            <div class="invalid-feedback">{{ form.email.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    {% if user.is_staff or user.is_superuser %}
+                    <div class="form-group mb-3">
+                        <label for="id_status_verifikasi" class="form-label">Status Verifikasi</label>
+                        <select class="form-select {% if form.status_verifikasi.errors %}is-invalid{% endif %}"
+                                id="id_status_verifikasi" name="status_verifikasi">
+                            <option value="pending" {% if form.status_verifikasi.value == 'pending' or not form.status_verifikasi.value %}selected{% endif %}>Pending</option>
+                            <option value="verified" {% if form.status_verifikasi.value == 'verified' %}selected{% endif %}>Terverifikasi</option>
+                        </select>
+                        {% if form.status_verifikasi.errors %}
+                            <div class="invalid-feedback">{{ form.status_verifikasi.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {% if object %}Simpan Perubahan{% else %}Daftar Anggota{% endif %}
+                        </button>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'anggota:list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Kembali
+                        </a>
+                        {% else %}
+                        <a href="{% url 'landing-page' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Kembali
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-format NIK input
+document.getElementById('id_nik').addEventListener('input', function(e) {
+    // Remove any non-digit characters
+    this.value = this.value.replace(/\D/g, '');
+
+    // Limit to 16 digits
+    if (this.value.length > 16) {
+        this.value = this.value.slice(0, 16);
+    }
+});
+
+// Auto-format phone number
+document.getElementById('id_no_hp').addEventListener('input', function(e) {
+    // Remove any non-digit characters except +
+    this.value = this.value.replace(/[^\d+]/g, '');
+});
+</script>
+{% endblock %}

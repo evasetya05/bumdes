@@ -1,0 +1,75 @@
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Tambah Jurnal</title>
+    <link rel="stylesheet" href="{% static 'ledger/css/journal_entry.css' %}">
+</head>
+<body>
+
+<h2>Tambah Jurnal</h2>
+
+<form method="post" onsubmit="return validateJournal()">
+    {% csrf_token %}
+
+    <div class="form-header">
+        <div class="form-group">
+            <label for="id_date">📅 Tanggal Transaksi</label>
+            <input type="date" id="id_date" name="date" value="{{ today }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="id_description">📝 Deskripsi Jurnal</label>
+            <textarea id="id_description" name="description" rows="3" placeholder="Tuliskan ringkasan transaksi..." required></textarea>
+        </div>
+    </div>
+
+    <h3>Item Jurnal</h3>
+
+    <table id="entries-table">
+        <thead>
+            <tr>
+                <th>Akun</th>
+                <th>Debit</th>
+                <th>Kredit</th>
+                <th>Keterangan</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody id="entries">
+            <tr class="entry">
+                <td>
+                    <select name="account_id[]">
+                        {% for account in accounts %}
+                            <option value="{{ account.id }}">{{ account.account_name }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="text" name="debit[]" value="" oninput="formatNumber(this)"></td>
+                <td><input type="text" name="credit[]" value="" oninput="formatNumber(this)"></td>
+
+                <td><input type="text" name="note[]" placeholder="Keterangan akun"></td>
+                <td><button type="button" onclick="removeEntry(this)">Hapus</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br>
+    <div>
+        <strong>Total:</strong><br>
+        Debit: <span id="total-debit">0.00</span><br>
+        Kredit: <span id="total-credit">0.00</span><br>
+        <p id="balance-warning" style="display:none;">⚠️ Total debit dan kredit belum seimbang!</p>
+    </div>
+
+    <br>
+    <button type="button" onclick="addEntry()">Tambah Baris</button>
+    <button type="submit">Simpan Jurnal</button>
+</form>
+
+<script src="{% static 'ledger/js/journal_entry.js' %}"></script>
+</body>
+</html>

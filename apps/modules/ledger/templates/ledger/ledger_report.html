@@ -1,0 +1,154 @@
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Laporan Buku Besar (Ledger)</title>
+
+    <!-- ✅ Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: "Segoe UI", Roboto, sans-serif;
+        }
+        h2 {
+            font-weight: 700;
+            color: #0d6efd;
+        }
+        .card {
+            border-radius: 12px;
+        }
+        .table th, .table td {
+            vertical-align: middle !important;
+        }
+        .table thead th {
+            background-color: #e9f2ff;
+        }
+        .table-warning {
+            background-color: #fff8e1 !important;
+        }
+        .table-success {
+            background-color: #e8f5e9 !important;
+        }
+        .alert {
+            border-radius: 10px;
+        }
+        .fw-semibold {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5 mb-5">
+
+    <!-- 🧾 Judul -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📘 Laporan Buku Besar (Ledger)</h2>
+    </div>
+
+    <!-- 🔽 Filter Periode -->
+    <form method="get" class="row g-2 align-items-center mb-4">
+        <div class="col-auto">
+            <label for="period" class="col-form-label fw-semibold">Periode:</label>
+        </div>
+        <div class="col-auto">
+            <select name="period" id="period" class="form-select">
+                <option value="">-- Periode Open (Berjalan) --</option>
+                {% for p in closed_periods %}
+                    <option value="{{ p.period }}" {% if selected_period == p.period %}selected{% endif %}>
+                        {{ p.period }} {% if p.is_closed %}(Closed){% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Tampilkan
+            </button>
+        </div>
+    </form>
+
+    <!-- 💬 Info Periode -->
+    {% if selected_period %}
+        <div class="alert alert-info border-start border-4 border-info shadow-sm">
+            <strong>Menampilkan transaksi untuk periode: {{ selected_period }}</strong>
+        </div>
+    {% else %}
+        <div class="alert alert-warning border-start border-4 border-warning shadow-sm">
+            Menampilkan transaksi untuk periode <strong>yang masih open (berjalan)</strong>.
+        </div>
+    {% endif %}
+
+    <!-- 📊 Data Buku Besar -->
+    {% if ledger_data %}
+        {% for data in ledger_data %}
+        <div class="card mb-4 shadow-sm border-0">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-semibold text-dark">
+                    {{ data.account.account_code }} — {{ data.account.account_name }}
+                </h5>
+                <span class="badge bg-secondary">
+                    {{ selected_period|default:"Open Period" }}
+                </span>
+            </div>
+
+            <div class="card-body p-0">
+                <table class="table table-hover table-bordered mb-0 align-middle">
+                    <thead class="text-center">
+                        <tr>
+                            <th style="width: 10%;">Tanggal</th>
+                            <th>Deskripsi</th>
+                            <th class="text-end" style="width: 15%;">Debit</th>
+                            <th class="text-end" style="width: 15%;">Kredit</th>
+                            <th class="text-end" style="width: 15%;">Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="table-warning fw-semibold">
+                            <td colspan="4">Saldo Awal</td>
+                            <td class="text-end">{{ data.opening_balance|default:"0"|intcomma }}</td>
+                        </tr>
+
+                        {% if data.rows %}
+                            {% for row in data.rows %}
+                            <tr>
+                                <td class="text-center">{{ row.date|date:"Y-m-d" }}</td>
+                                <td>{{ row.desc|default:"-" }}</td>
+                                <td class="text-end">{{ row.debit|default:"0" }}</td>
+                                <td class="text-end">{{ row.credit|default:"0" }}</td>
+                                <td class="text-end">{{ row.balance|default:"0" }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr class="text-center text-muted">
+                                <td colspan="5"><em>Tidak ada transaksi pada periode ini</em></td>
+                            </tr>
+                        {% endif %}
+
+                        <tr class="table-success fw-semibold">
+                            <td colspan="4">Saldo Akhir</td>
+                            <td class="text-end">{{ data.closing_balance|default:"0"|intcomma }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-secondary text-center shadow-sm">
+            <i class="bi bi-inbox fs-4"></i><br>
+            Tidak ada data buku besar yang dapat ditampilkan untuk periode ini.
+        </div>
+    {% endif %}
+</div>
+
+<!-- ✅ Bootstrap JS (opsional, untuk dropdown dsb) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

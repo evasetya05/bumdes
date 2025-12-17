@@ -1,0 +1,56 @@
+{% load static %}
+{% load humanize %}
+{% load ledger_extras %}
+
+<link rel="stylesheet" href="{% static 'ledger/css/journal_list.css' %}">
+
+<h2>📘 Daftar Jurnal</h2>
+
+{% for period, journals in grouped_journals.items %}
+<div class="period-section">
+    <h3>Periode: {{ period }}</h3>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Deskripsi</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for journal in journals %}
+            <tr>
+                <td>{{ journal.date|date:"Y-m-d" }}</td>
+                <td>{{ journal.description }}</td>
+                <td>
+                    {% if journal.is_posted %}
+                        <span class="status-posted">Posted</span>
+                    {% else %}
+                        <span class="status-unposted">Not Posted</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% with cp=journal.period|default_if_none:"" %}
+                        {% if not journal.is_posted %}
+                            <a href="{% url 'ledger:journal_edit' journal.id %}" class="btn btn-edit">Edit</a>
+                        {% else %}
+                            {% with closing=cp|closing_status %}
+                                {% if not closing %}
+                                    <a href="{% url 'ledger:journal_edit' journal.id %}" class="btn btn-edit">Edit</a>
+                                {% else %}
+                                    <em class="text-muted">Sudah Closing</em>
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                    {% endwith %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% empty %}
+<div class="alert alert-secondary">Belum ada jurnal.</div>
+{% endfor %}

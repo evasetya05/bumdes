@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Buat Closing Bulanan</title>
+</head>
+<body>
+    <h2>Buat Closing Bulanan</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label>Periode (format: YYYY-MM)</label>
+        <input type="text" name="period" placeholder="contoh: 2025-10" required>
+        <button type="submit">Simpan</button>
+    </form>
+
+    <a href="{% url 'ledger:closing_period_list' %}">← Kembali ke daftar</a>
+</body>
+</html>

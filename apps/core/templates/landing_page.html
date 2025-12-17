@@ -1,0 +1,70 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Selamat Datang - ERP Lab{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="display-4 mb-4">Selamat Datang di Koperasi Desa Merah Putih Desa Sumberoto</h1>
+
+            
+            {% if user.is_authenticated %}
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg px-4 me-sm-3">Masuk ke Dashboard</a>
+            </div>
+            {% else %}
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a href="{% url 'anggota:public_create' %}" class="btn btn-success btn-lg px-4 me-sm-3">
+                    <i class="fas fa-user-plus"></i> Daftar Anggota Koperasi
+                </a>
+                
+            </div>
+            {% endif %}
+            
+            <div class="row mt-5">
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Manajemen Keuangan</h5>
+                            <p class="card-text">Kelola keuangan bisnis Anda dengan mudah dan efisien.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Laporan Lengkap</h5>
+                            <p class="card-text">Akses berbagai laporan untuk analisis bisnis yang lebih baik.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Akses Mudah</h5>
+                            <p class="card-text">Akses sistem kapan saja dan di mana saja.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    /* Prevent accidental horizontal scroll on landing page */
+    body {
+        overflow-x: hidden;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+</style>
+{% endblock %}

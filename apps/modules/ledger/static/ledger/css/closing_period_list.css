@@ -1,0 +1,115 @@
+body {
+  font-family: "Segoe UI", sans-serif;
+  margin: 40px;
+  background: #f4f6f9;
+}
+
+h2 {
+  color: #0d6efd;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+th, td {
+  border-bottom: 1px solid #eee;
+  padding: 14px;
+  text-align: left;
+  font-size: 15px;
+}
+
+th {
+  background: #e9f2ff;
+  color: #333;
+  font-weight: 600;
+}
+
+tr:hover {
+  background: #f9fafb;
+}
+
+.status-open {
+  color: #198754;
+  font-weight: 700;
+}
+
+.status-closed {
+  color: #dc3545;
+  font-weight: 700;
+}
+
+.btn {
+  padding: 7px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: white;
+  font-size: 14px;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-close {
+  background-color: #dc3545;
+}
+
+.btn-close:hover {
+  background-color: #b52a3b;
+}
+
+.badge {
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 5px;
+}
+
+.badge-user {
+  background: #e7f1ff;
+  color: #0d6efd;
+}
+
+.badge-time {
+  background: #f8f9fa;
+  color: #555;
+}
+
+/* 🔧 PERBAIKAN STYLING BADGE HIJAU */
+td {
+  vertical-align: middle;
+}
+
+.badge-current {
+  background: #198754;
+  color: #fff;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-left: 10px;
+  display: inline-block;
+  font-size: 13px;
+  line-height: 1.2;
+  position: relative;
+  top: -1px; /* sedikit naik biar sejajar teks */
+}
+
+/* Sedikit perbaikan spacing antar baris */
+tr td:first-child {
+  white-space: nowrap;
+}
+
+/* Tambahan efek hover untuk tombol */
+.btn-close {
+  background-color: #dc3545;
+  transition: background 0.2s ease;
+}
+
+.btn-close:hover {
+  background-color: #b52a3b;
+}

@@ -1,0 +1,89 @@
+/* ===== 🎨 Styling Daftar Jurnal ===== */
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  margin: 40px;
+  background: #f5f7fa;
+}
+
+h2 {
+  color: #0d6efd;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+h3 {
+  margin-top: 40px;
+  color: #333;
+  background: #e9f2ff;
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-size: 18px;
+}
+
+/* ===== 🧾 Table ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+
+th, td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  font-size: 14px;
+}
+
+th {
+  background: #f7f9fc;
+  color: #333;
+  font-weight: 600;
+}
+
+tr:hover {
+  background: #f9fafb;
+}
+
+/* ===== 🟢 Status ===== */
+.status-posted {
+  color: #198754;
+  font-weight: 600;
+}
+
+.status-not-posted {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* ===== 🔘 Button ===== */
+.btn-edit {
+  background: #0d6efd;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.btn-edit:hover {
+  background: #0b5ed7;
+}
+
+/* ===== 💤 Misc ===== */
+.no-data {
+  text-align: center;
+  color: #777;
+  padding: 15px;
+  font-style: italic;
+}
+
+.no-action {
+  color: #aaa;
+  font-style: italic;
+}

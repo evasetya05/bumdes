@@ -1,0 +1,83 @@
+/* ====== GAYA DASAR ====== */
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fb;
+    margin: 30px;
+    color: #333;
+}
+
+/* ====== JUDUL DAN LINK ====== */
+h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 26px;
+}
+
+a[href*="account_create"] {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+a[href*="account_create"]:hover {
+    background-color: #388E3C;
+    transform: translateY(-1px);
+}
+
+/* ====== TABEL ====== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+th, td {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 15px;
+}
+
+th {
+    background-color: #e8f5e9;
+    color: #2c3e50;
+    border-bottom: 2px solid #b2dfdb;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f8e9;
+}
+
+/* ====== STATUS ====== */
+td:last-child {
+    font-weight: bold;
+}
+
+td:last-child:contains("Aktif") {
+    color: #2e7d32;
+}
+
+td:last-child:contains("Tidak Aktif") {
+    color: #e53935;
+}
+
+/* ====== PESAN KOSONG ====== */
+td[colspan="5"] {
+    text-align: center;
+    padding: 20px;
+    color: #777;
+    font-style: italic;
+}

@@ -1,0 +1,179 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Laporan Rasio Keuangan</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 30px;
+      background-color: #fafafa;
+      color: #222;
+    }
+    h2, h3, h4, h5 {
+      color: #005b96;
+      margin-bottom: 8px;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 80%;
+      margin-bottom: 18px;
+      background-color: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #f0f8ff;
+      text-align: left;
+    }
+    .nilai-right {
+      text-align: right;
+    }
+    summary {
+      cursor: pointer;
+      font-weight: bold;
+      background-color: #eef6ff;
+      padding: 6px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    details {
+      background-color: #f9fcff;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.05);
+    }
+    .ratio-section {
+      border-left: 4px solid #007acc;
+      padding-left: 10px;
+      margin-bottom: 30px;
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    hr {
+      border: none;
+      border-top: 2px solid #ccc;
+      margin: 25px 0;
+    }
+  </style>
+</head>
+<body>
+
+<h2>📅 Rasio Profitabilitas</h2>
+
+<form method="get">
+  <label><strong>Pilih Periode:</strong></label>
+  <select name="period" onchange="this.form.submit()">
+    {% for p in periods %}
+      <option value="{{ p.period }}" {% if p.period == periode %}selected{% endif %}>{{ p.period }}</option>
+    {% endfor %}
+  </select>
+</form>
+
+<p><strong>Periode Aktif:</strong> {{ periode }}</p>
+
+
+
+<!-- ======================= -->
+<!-- 📊 Ringkasan Rasio -->
+
+<table>
+  <tr>
+    <th>Jenis Rasio</th>
+    <th class="nilai-right">Nilai</th>
+  </tr>
+  {% for r in ratios %}
+    <tr>
+      <td>{{ forloop.counter }}️⃣ {{ r.nama }}</td>
+      <td class="nilai-right">{{ r.hasil|floatformat:2 }}</td>
+    </tr>
+  {% endfor %}
+</table>
+
+<hr>
+
+<!-- ======================= -->
+<!-- 📈 Detail Penjelasan -->
+<h3>📈 Detail Penjelasan Rasio</h3>
+{% for r in ratios %}
+  <div class="ratio-section">
+    <h4>{{ forloop.counter }}️⃣ {{ r.nama }}</h4>
+    <p><em>Rumus:</em> {{ r.rumus }}</p>
+    <p>{{ r.detail }}</p>
+
+    <details>
+      <summary>🔽 Tampilkan Rincian Akun</summary>
+      <div style="margin-left:12px; margin-top:8px;">
+
+        {% if r.numerator.pendapatan %}
+          <h5>📘 Pendapatan (Subtotal)</h5>
+          <table>
+            <tr><th>Akun</th><th class="nilai-right">Saldo</th></tr>
+            {% for a in r.numerator.pendapatan.rows %}
+              <tr><td>{{ a.nama }}</td><td class="nilai-right">{{ a.saldo|floatformat:2|intcomma }}</td></tr>
+            {% endfor %}
+            <tr><td><strong>Total Pendapatan</strong></td><td class="nilai-right"><strong>{{ r.numerator.pendapatan.total|floatformat:2|intcomma }}</strong></td></tr>
+          </table>
+        {% endif %}
+
+        {% if r.numerator.hpp %}
+          <h5>📕 Harga Pokok Penjualan (HPP)</h5>
+          <table>
+            <tr><th>Akun</th><th class="nilai-right">Saldo</th></tr>
+            {% for a in r.numerator.hpp.rows %}
+              <tr><td>{{ a.nama }}</td><td class="nilai-right">{{ a.saldo|floatformat:2|intcomma }}</td></tr>
+            {% endfor %}
+            <tr><td><strong>Total HPP</strong></td><td class="nilai-right"><strong>{{ r.numerator.hpp.total|floatformat:2|intcomma }}</strong></td></tr>
+          </table>
+        {% endif %}
+
+        {% if r.numerator.biaya %}
+          <h5>📙 Biaya (Subtotal)</h5>
+          <table>
+            <tr><th>Akun</th><th class="nilai-right">Saldo</th></tr>
+            {% for a in r.numerator.biaya.rows %}
+              <tr><td>{{ a.nama }}</td><td class="nilai-right">{{ a.saldo|floatformat:2|intcomma }}</td></tr>
+            {% endfor %}
+            <tr><td><strong>Total Biaya</strong></td><td class="nilai-right"><strong>{{ r.numerator.biaya.total|floatformat:2|intcomma }}</strong></td></tr>
+          </table>
+        {% endif %}
+
+        <h5>📌 Nilai Bersih yang Dipakai</h5>
+        {% if r.numerator.laba_kotor %}
+          <p><strong>Laba Kotor:</strong> {{ r.numerator.laba_kotor.value|floatformat:2|intcomma }}</p>
+        {% endif %}
+        {% if r.numerator.laba_bersih %}
+          <p><strong>Laba Bersih:</strong> {{ r.numerator.laba_bersih.value|floatformat:2|intcomma }}</p>
+        {% endif %}
+
+        <h5>📗 Komponen Penimbang (Denominator)</h5>
+        <table>
+          <tr><th>Akun</th><th class="nilai-right">Saldo</th></tr>
+          {% for a in r.denominator.rows %}
+            <tr><td>{{ a.nama }}</td><td class="nilai-right">{{ a.saldo|floatformat:2|intcomma }}</td></tr>
+          {% endfor %}
+          <tr><td><strong>Total</strong></td><td class="nilai-right"><strong>{{ r.denominator.total|floatformat:2|intcomma }}</strong></td></tr>
+        </table>
+
+      </div>
+    </details>
+  </div>
+{% endfor %}
+
+</body>
+</html>

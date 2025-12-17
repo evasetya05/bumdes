@@ -1,0 +1,121 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Laporan Laba Rugi</title>
+    <link rel="stylesheet" href="{% static 'ledger/css/profit_loss.css' %}">
+</head>
+<body>
+
+<h2>Laporan Laba Rugi</h2>
+
+<h2>Laporan Laba Rugi</h2>
+
+<form method="get" class="period-form">
+    <label for="period">Periode (Closing):</label>
+    <select name="period" id="period">
+        {% for period in closing_periods %}
+            <option value="{{ period.period }}" {% if period.period == selected_period %}selected{% endif %}>
+                {{ period.period }}
+            </option>
+        {% endfor %}
+    </select>
+    <button type="submit">Tampilkan</button>
+</form>
+
+
+<!-- Wrapper horizontal -->
+<div class="profit-loss-container">
+
+    <!-- Bagian Pendapatan -->
+    <div class="profit-section">
+        <h3>Pendapatan</h3>
+        {% for data in income_data %}
+        <h4>{{ data.account.code }} - {{ data.account.account_name }}</h4>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Deskripsi</th>
+                        <th class="text-right">Debit</th>
+                        <th class="text-right">Credit</th>
+                        <th class="text-right">Saldo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data.rows %}
+                    <tr>
+                        <td>{{ row.date }}</td>
+                        <td>{{ row.desc }}</td>
+                        <td class="text-right">{{ row.debit|floatformat:0|intcomma }}</td>
+                        <td class="text-right">{{ row.credit|floatformat:0|intcomma }}</td>
+                        <td class="text-right">{{ row.balance|floatformat:0|intcomma }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="subtotal-row">
+                        <td colspan="4">Subtotal Pendapatan</td>
+                        <td class="text-right">{{ data.subtotal|floatformat:0|intcomma }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+
+        <div class="total-summary">
+            Total Pendapatan: <strong>{{ total_income|floatformat:0|intcomma }}</strong>
+        </div>
+    </div>
+
+    <!-- Bagian Pengeluaran -->
+    <div class="profit-section">
+        <h3>Pengeluaran</h3>
+        {% for data in expense_data %}
+        <h4>{{ data.account.code }} - {{ data.account.account_name }}</h4>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Deskripsi</th>
+                        <th class="text-right">Debit</th>
+                        <th class="text-right">Credit</th>
+                        <th class="text-right">Saldo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data.rows %}
+                    <tr>
+                        <td>{{ row.date }}</td>
+                        <td>{{ row.desc }}</td>
+                        <td class="text-right">{{ row.debit|floatformat:0|intcomma }}</td>
+                        <td class="text-right">{{ row.credit|floatformat:0|intcomma }}</td>
+                        <td class="text-right">{{ row.balance|floatformat:0|intcomma }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="subtotal-row">
+                        <td colspan="4">Subtotal Pengeluaran</td>
+                        <td class="text-right">{{ data.subtotal|floatformat:0|intcomma }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+
+        <div class="total-summary">
+            Total Pengeluaran: <strong>{{ total_expense|floatformat:0|intcomma }}</strong>
+        </div>
+    </div>
+</div>
+
+<!-- Bagian Laba Rugi Bersih -->
+<div class="net-income">
+    Laba / Rugi Bersih: <strong>{{ net_income|floatformat:0|intcomma }}</strong>
+</div>
+
+</body>
+</html>

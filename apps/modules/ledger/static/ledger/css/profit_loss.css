@@ -1,0 +1,149 @@
+
+/* 🔹 Form pilihan periode */
+.period-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.period-form label {
+    font-weight: bold;
+}
+
+.period-form select {
+    padding: 6px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+    background-color: #fff;
+}
+
+.period-form button {
+    padding: 6px 15px;
+    background-color: #16a085;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.period-form button:hover {
+    background-color: #138d75;
+}
+
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 40px;
+    background-color: #fafafa;
+    color: #333;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2c3e50;
+}
+
+/* --- Layout 2 kolom (Pendapatan & Pengeluaran) --- */
+.profit-loss-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 30px;
+}
+
+/* --- Tiap kolom --- */
+.profit-section {
+    flex: 1;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+h3 {
+    text-align: center;
+    color: #2c3e50;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+}
+
+h4 {
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #34495e;
+}
+
+/* --- Tabel --- */
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+}
+
+th, td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    font-size: 0.9em;
+}
+
+th {
+    background-color: #f0f0f0;
+    text-align: left;
+    color: #2c3e50;
+}
+
+.text-right {
+    text-align: right;
+}
+
+tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.subtotal-row td {
+    background-color: #eef5ff;
+    font-weight: bold;
+}
+
+.total-summary {
+    text-align: right;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #2c3e50;
+}
+
+/* --- Bagian laba rugi bersih --- */
+.net-income {
+    text-align: center;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #16a085;
+    margin-top: 40px;
+    border-top: 2px solid #ccc;
+    padding-top: 15px;
+}
+
+/* --- Cetak --- */
+@media print {
+    body {
+        background: none;
+        color: #000;
+    }
+    .profit-loss-container {
+        gap: 10px;
+    }
+    .profit-section {
+        box-shadow: none;
+        border: 1px solid #aaa;
+    }
+}

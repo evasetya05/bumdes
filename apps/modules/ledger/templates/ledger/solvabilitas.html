@@ -1,0 +1,339 @@
+{% block content %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Laporan Rasio Keuangan</title>
+  <style>
+    /* ======== GAYA DASAR ======== */
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 30px;
+      background-color: #fafafa;
+      color: #222;
+    }
+    h2, h3, h4, h5 {
+      color: #005b96;
+      margin-bottom: 8px;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    hr {
+      border: none;
+      border-top: 2px solid #ccc;
+      margin: 25px 0;
+    }
+
+    /* ======== TABEL UTAMA ======== */
+    table.main-table {
+      border-collapse: collapse;
+      width: 50%;
+      background-color: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    table.main-table th, table.main-table td {
+      border: 1px solid #ddd;
+      padding: 8px 10px;
+      text-align: center;
+    }
+    table.main-table th {
+      background-color: #f0f8ff;
+      color: #003366;
+    }
+
+    /* ======== KARTU RASIO ======== */
+    .ratio-card {
+      border-left: 4px solid #007acc;
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 25px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .ratio-card h4 {
+      color: #004d80;
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    .formula {
+      font-family: Consolas, monospace;
+      background: #eef6ff;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .value-box {
+      font-weight: bold;
+      color: #00796b;
+    }
+
+    /* ======== TABEL RINCIAN AKUN ======== */
+    table.ratio-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: #fff;
+    }
+    table.ratio-table th, table.ratio-table td {
+      border: 1px solid #ddd;
+      padding: 6px 10px;
+      text-align: left;
+    }
+    table.ratio-table th {
+      background-color: #f0f8ff;
+      color: #004d80;
+    }
+    table.ratio-table td:last-child {
+      text-align: right;
+    }
+    table.ratio-table tr:nth-child(even) {
+      background-color: #fafcff;
+    }
+
+    /* ======== DETAILS & SUMMARY ======== */
+    details {
+      background-color: #f9fcff;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.05);
+    }
+    summary {
+      cursor: pointer;
+      font-weight: bold;
+      background-color: #eef6ff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      transition: background 0.2s ease;
+    }
+    summary:hover {
+      background-color: #e0f0ff;
+    }
+
+    /* ======== SUBTOTAL ======== */
+    .subtotal-row td {
+      font-weight: bold;
+      background-color: #f4fbff;
+      border-top: 2px solid #007acc;
+    }
+
+    /* ======== SPASI DAN FORMAT ======== */
+    p {
+      margin: 6px 0;
+    }
+    .divider {
+      margin: 30px 0;
+    }
+  </style>
+</head>
+
+
+<div class="container">
+  <h2>📅 Rasio Solvabilitas & Likuiditas</h2>
+
+  <form method="get">
+    <label><strong>Pilih Periode:</strong></label>
+    <select name="period" onchange="this.form.submit()">
+      {% for p in periods %}
+        <option value="{{ p.period }}" {% if p.period == period %}selected{% endif %}>{{ p.period }}</option>
+      {% endfor %}
+    </select>
+  </form>
+
+  <p><strong>Periode Aktif:</strong> {{ period }}</p>
+
+  <!-- Ringkasan Rasio -->
+  <table class="main-table">
+    <thead>
+      <tr><th>Jenis Rasio</th><th>Nilai</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Rasio Lancar</td><td>{{ rasio_lancar|floatformat:2 }}</td></tr>
+      <tr><td>Rasio Cepat</td><td>{{ rasio_cepat|floatformat:2 }}</td></tr>
+      <tr><td>Rasio Utang terhadap Aset</td><td>{{ rasio_utang_aset|floatformat:2 }}</td></tr>
+      <tr><td>Rasio Utang terhadap Modal</td><td>{{ rasio_utang_modal|floatformat:2 }}</td></tr>
+      <tr><td>Rasio Ekuitas terhadap Aset</td><td>{{ rasio_ekuitas_aset|floatformat:2 }}</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+  <h3>📈 Penjelasan Rasio</h3>
+
+  <!-- 🔹 RASIO LANCAR -->
+  <div class="ratio-card">
+    <h4>1️⃣ Rasio Lancar</h4>
+    <p><strong>Rumus:</strong> <span class="formula">Aset Lancar / Kewajiban Lancar</span></p>
+    <p>
+      Aset Lancar = <span class="value-box">{{ aset_lancar|floatformat:2|intcomma }}</span><br>
+      Kewajiban Lancar = <span class="value-box">{{ kewajiban_lancar|floatformat:2|intcomma }}</span>
+    </p>
+    <p>➡️ {{ aset_lancar|floatformat:2|intcomma }} / {{ kewajiban_lancar|floatformat:2|intcomma }} = <strong>{{ rasio_lancar|floatformat:2 }}</strong></p>
+
+    <details>
+      <summary>🔍 Lihat rincian akun</summary>
+      <h5>📘 Aset Lancar</h5>
+      <table class="ratio-table">
+        <tr><th>COA</th><th>Nama Akun</th><th style="text-align:right;">Saldo</th></tr>
+        {% for a in aset_lancar_detail %}
+          <tr><td>{{ a.coa }}</td><td>{{ a.name }}</td><td style="text-align:right;">{{ a.balance|floatformat:2|intcomma }}</td></tr>
+        {% endfor %}
+        <tr>
+          <td colspan="2" style="text-align:right;"><strong>Subtotal Aset Lancar</strong></td>
+          <td style="text-align:right;"><strong>{{ aset_lancar|floatformat:2|intcomma }}</strong></td>
+        </tr>
+      </table>
+
+      <h5>📗 Kewajiban Lancar</h5>
+      <table class="ratio-table">
+        <tr><th>COA</th><th>Nama Akun</th><th style="text-align:right;">Saldo</th></tr>
+        {% for k in kewajiban_detail %}
+          <tr><td>{{ k.coa }}</td><td>{{ k.name }}</td><td style="text-align:right;">{{ k.balance|floatformat:2|intcomma }}</td></tr>
+        {% endfor %}
+        <tr>
+          <td colspan="2" style="text-align:right;"><strong>Subtotal Kewajiban Lancar</strong></td>
+          <td style="text-align:right;"><strong>{{ kewajiban_lancar|floatformat:2|intcomma }}</strong></td>
+        </tr>
+      </table>
+    </details>
+  </div>
+
+  <!-- 🔹 RASIO CEPAT -->
+  <div class="ratio-card">
+    <h4>2️⃣ Rasio Cepat</h4>
+    <p><strong>Rumus:</strong> <span class="formula">(Aset Lancar - Persediaan) / Kewajiban Lancar</span></p>
+    <p>
+      Aset Lancar = <span class="value-box">{{ aset_lancar|floatformat:2|intcomma }}</span><br>
+      Persediaan = <span class="value-box">{{ persediaan|floatformat:2|intcomma }}</span><br>
+      Kewajiban Lancar = <span class="value-box">{{ kewajiban_lancar|floatformat:2|intcomma }}</span>
+    </p>
+    <p>➡️ ({{ aset_lancar|floatformat:2|intcomma }} - {{ persediaan|floatformat:2|intcomma }}) / {{ kewajiban_lancar|floatformat:2|intcomma }} = <strong>{{ rasio_cepat|floatformat:2 }}</strong></p>
+
+    <details>
+      <summary>🔍 Lihat rincian akun</summary>
+      <h5>📦 Persediaan</h5>
+      <table class="ratio-table">
+        <tr><th>COA</th><th>Nama Akun</th><th style="text-align:right;">Saldo</th></tr>
+        {% for p in persediaan_detail %}
+          <tr><td>{{ p.coa }}</td><td>{{ p.name }}</td><td style="text-align:right;">{{ p.balance|floatformat:2|intcomma }}</td></tr>
+        {% endfor %}
+        <tr>
+          <td colspan="2" style="text-align:right;"><strong>Subtotal Persediaan</strong></td>
+          <td style="text-align:right;"><strong>{{ persediaan|floatformat:2|intcomma }}</strong></td>
+        </tr>
+      </table>
+    </details>
+  </div>
+
+   <!-- 🔹 RASIO UTANG/ASET -->
+  <div class="ratio-card">
+    <h4>3️⃣ Rasio Utang terhadap Aset</h4>
+    <p><strong>Rumus:</strong> <span class="formula">Total Kewajiban / Total Aset</span></p>
+    <p>➡️ {{ kewajiban_lancar|floatformat:2|intcomma }} / {{ aset_lancar|floatformat:2|intcomma }} = <strong>{{ rasio_utang_aset|floatformat:2 }}</strong></p>
+
+    <details>
+      <summary>🔍 Lihat rincian akun</summary>
+      <h5>📗 Komponen 1: Total Kewajiban</h5>
+      <table class="ratio-table">
+        <tr><th>COA</th><th>Nama Akun</th><th style="text-align:right;">Saldo</th></tr>
+        {% for k in kewajiban_detail %}
+          <tr><td>{{ k.coa }}</td><td>{{ k.name }}</td><td style="text-align:right;">{{ k.balance|floatformat:2|intcomma }}</td></tr>
+        {% endfor %}
+        <tr class="subtotal-row">
+          <td colspan="2" style="text-align:right;">Subtotal Kewajiban</td>
+          <td style="text-align:right;">{{ kewajiban_lancar|floatformat:2|intcomma }}</td>
+        </tr>
+      </table>
+
+      <h5>📘 Komponen 2: Total Aset</h5>
+      <table class="ratio-table">
+        <tr><th>COA</th><th>Nama Akun</th><th style="text-align:right;">Saldo</th></tr>
+        {% for a in aset_lancar_detail %}
+          <tr><td>{{ a.coa }}</td><td>{{ a.name }}</td><td style="text-align:right;">{{ a.balance|floatformat:2|intcomma }}</td></tr>
+        {% endfor %}
+        <tr class="subtotal-row">
+          <td colspan="2" style="text-align:right;">Subtotal Aset</td>
+          <td style="text-align:right;">{{ aset_lancar|floatformat:2|intcomma }}</td>
+        </tr>
+      </table>
+    </details>
+  </div>
+
+  <!-- 🔹 RASIO UTANG/MODAL -->
+  <div class="ratio-card">
+    <h4>4️⃣ Rasio Utang terhadap Modal</h4>
+    <p><strong>Rumus:</strong> <span class="formula">Total Kewajiban / Total Ekuitas</span></p>
+    <p>➡️ {{ kewajiban_lancar|floatformat:2|intcomma }} / {{ ekuitas|floatformat:2|intcomma }} = <strong>{{ rasio_utang_modal|floatformat:2 }}</strong></p>
+
+    <details>
+      <summary>🔍 Lihat rincian akun</summary>
+      <h5>📗 Komponen 1: Total Kewajiban</h5>
+      <table class="ratio-table">
+        <tr><th>COA</th><th>Nama Akun</th><th style="text-align:right;">Saldo</th></tr>
+        {% for k in kewajiban_detail %}
+          <tr><td>{{ k.coa }}</td><td>{{ k.name }}</td><td style="text-align:right;">{{ k.balance|floatformat:2|intcomma }}</td></tr>
+        {% endfor %}
+        <tr class="subtotal-row">
+          <td colspan="2" style="text-align:right;">Subtotal Kewajiban</td>
+          <td style="text-align:right;">{{ kewajiban_lancar|floatformat:2|intcomma }}</td>
+        </tr>
+      </table>
+
+      <h5>📘 Komponen 2: Total Ekuitas</h5>
+      <table class="ratio-table">
+        <tr><th>COA</th><th>Nama Akun</th><th style="text-align:right;">Saldo</th></tr>
+        {% for e in ekuitas_detail %}
+          <tr><td>{{ e.coa }}</td><td>{{ e.name }}</td><td style="text-align:right;">{{ e.balance|floatformat:2|intcomma }}</td></tr>
+        {% endfor %}
+        <tr class="subtotal-row">
+          <td colspan="2" style="text-align:right;">Subtotal Ekuitas</td>
+          <td style="text-align:right;">{{ ekuitas|floatformat:2|intcomma }}</td>
+        </tr>
+      </table>
+    </details>
+  </div>
+
+  <!-- 🔹 RASIO EKUITAS/ASET -->
+  <div class="ratio-card">
+    <h4>5️⃣ Rasio Ekuitas terhadap Aset</h4>
+    <p><strong>Rumus:</strong> <span class="formula">Total Ekuitas / Total Aset</span></p>
+    <p>➡️ {{ ekuitas|floatformat:2|intcomma }} / {{ aset_lancar|floatformat:2|intcomma }} = <strong>{{ rasio_ekuitas_aset|floatformat:2 }}</strong></p>
+
+    <details>
+      <summary>🔍 Lihat rincian akun</summary>
+      <h5>📗 Komponen 1: Total Ekuitas</h5>
+      <table class="ratio-table">
+        <tr><th>COA</th><th>Nama Akun</th><th style="text-align:right;">Saldo</th></tr>
+        {% for e in ekuitas_detail %}
+          <tr><td>{{ e.coa }}</td><td>{{ e.name }}</td><td style="text-align:right;">{{ e.balance|floatformat:2|intcomma }}</td></tr>
+        {% endfor %}
+        <tr class="subtotal-row">
+          <td colspan="2" style="text-align:right;">Subtotal Ekuitas</td>
+          <td style="text-align:right;">{{ ekuitas|floatformat:2|intcomma }}</td>
+        </tr>
+      </table>
+
+      <h5>📘 Komponen 2: Total Aset</h5>
+      <table class="ratio-table">
+        <tr><th>COA</th><th>Nama Akun</th><th style="text-align:right;">Saldo</th></tr>
+        {% for a in aset_lancar_detail %}
+          <tr><td>{{ a.coa }}</td><td>{{ a.name }}</td><td style="text-align:right;">{{ a.balance|floatformat:2|intcomma }}</td></tr>
+        {% endfor %}
+        <tr class="subtotal-row">
+          <td colspan="2" style="text-align:right;">Subtotal Aset</td>
+          <td style="text-align:right;">{{ aset_lancar|floatformat:2|intcomma }}</td>
+        </tr>
+      </table>
+    </details>
+  </div>
+</div>
+{% endblock %}

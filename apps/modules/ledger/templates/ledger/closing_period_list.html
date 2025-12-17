@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>📅 Manajemen Closing Periode</title>
+  <link rel="stylesheet" href="{% static 'ledger/css/closing_period_list.css' %}">
+</head>
+<body>
+
+  <h2>📘 Manajemen Closing Periode</h2>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 15%;">Periode</th>
+          <th style="width: 15%;">Status</th>
+          <th>Waktu Tutup</th>
+          <th>Ditutup Oleh</th>
+          <th style="width: 15%;">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for period in periods %}
+        <tr>
+          <td>
+            {{ period.period }}
+            {% if not period.is_closed %}
+              <span class="badge-current">Periode Aktif</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if period.is_closed %}
+              <span class="status-closed">Closed</span>
+            {% else %}
+              <span class="status-open">Open</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if period.closed_at %}
+              <span class="badge badge-time">{{ period.closed_at|date:"Y-m-d H:i" }}</span>
+            {% else %}
+              <em class="text-muted">-</em>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if period.closed_by %}
+              <span class="badge badge-user">{{ period.closed_by }}</span>
+            {% else %}
+              <em class="text-muted">-</em>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if not period.is_closed %}
+              <a href="{% url 'ledger:close_period' period.period %}"
+                 class="btn btn-close"
+                 onclick="return confirm('Yakin ingin menutup periode {{ period.period }} dan membuka periode berikutnya?');">
+                 Tutup & Lanjutkan
+              </a>
+            {% else %}
+              <em class="text-muted">Sudah ditutup</em>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center text-muted py-3">
+            Belum ada periode tersedia.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</body>
+</html>

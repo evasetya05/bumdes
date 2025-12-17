@@ -1,0 +1,182 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Pembukuan{% endblock %}
+
+{% block content %}
+<div class="ledger-dashboard">
+    <style>
+        .ledger-dashboard .card {
+            border: 0;
+            border-radius: 1rem;
+            box-shadow: 0 0.75rem 1.5rem rgba(15, 23, 42, 0.08);
+        }
+
+        .ledger-dashboard .hero-card {
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.12), rgba(111, 66, 193, 0.08));
+        }
+
+        .ledger-dashboard .hero-card .card-body {
+            padding: 2rem 2.5rem;
+        }
+
+        .ledger-dashboard .icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ledger-dashboard .card-title {
+            font-weight: 600;
+        }
+
+        .ledger-dashboard .list-group-item {
+            border: 0;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .ledger-dashboard .list-group-item:not(:last-child) {
+            border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+        }
+
+        .ledger-dashboard .list-group-item a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .ledger-dashboard .list-group-item a:hover {
+            color: #0d6efd;
+        }
+    </style>
+
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="card hero-card border-0">
+                <div class="card-body d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center">
+                    <div class="me-lg-4">
+                        <h1 class="h3 mb-2">Selamat Datang di Sistem Pembukuan</h1>
+                        
+                    </div>
+   
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="icon-wrapper bg-primary text-white me-3">
+                            <i class="fas fa-book-open"></i>
+                        </span>
+                        <div>
+                            <h5 class="card-title mb-0">Manajemen Jurnal</h5>
+                            <small class="text-muted">Catat dan review transaksi harian.</small>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'ledger:create_journal_entry' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i> Buat Jurnal Baru
+                        </a>
+                        <a href="{% url 'ledger:journal_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-list-ul me-1"></i> Daftar Jurnal
+                        </a>
+                        <a href="{% url 'ledger:closing_period_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-calendar-check me-1"></i> Closing Period
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="icon-wrapper bg-success text-white me-3">
+                            <i class="fas fa-layer-group"></i>
+                        </span>
+                        <div>
+                            <h5 class="card-title mb-0">Pengaturan Akun</h5>
+                            <small class="text-muted">Kelola struktur akun perusahaan.</small>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'ledger:account_create' %}" class="btn btn-success">
+                            <i class="fas fa-folder-plus me-1"></i> Tambah Akun
+                        </a>
+                        <a href="{% url 'ledger:account_list' %}" class="btn btn-outline-success">
+                            <i class="fas fa-folder-open me-1"></i> Semua Akun
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="icon-wrapper bg-warning text-dark me-3">
+                            <i class="fas fa-chart-line"></i>
+                        </span>
+                        <div>
+                            <h5 class="card-title mb-0">Laporan & Analitik</h5>
+                            <small class="text-muted">Pantau performa keuangan secara real-time.</small>
+                        </div>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0">
+                            <a href="{% url 'ledger:ledger_report' %}">
+                                <i class="fas fa-book me-2 text-primary"></i>Laporan Buku Besar
+                            </a>
+                        </li>
+                        <li class="list-group-item px-0">
+                            <a href="{% url 'ledger:balance_sheet' %}">
+                                <i class="fas fa-balance-scale me-2 text-success"></i>Neraca Saldo
+                            </a>
+                        </li>
+                        <li class="list-group-item px-0">
+                            <a href="{% url 'ledger:profit_loss_report' %}">
+                                <i class="fas fa-file-invoice-dollar me-2 text-danger"></i>Laporan Laba Rugi
+                            </a>
+                        </li>
+                        <li class="list-group-item px-0">
+                            <a href="{% url 'ledger:solvabilitas' %}">
+                                <i class="fas fa-chart-pie me-2 text-info"></i>Analisis Solvabilitas
+                            </a>
+                        </li>
+                        <li class="list-group-item px-0">
+                            <a href="{% url 'ledger:profitabilitas' %}">
+                                <i class="fas fa-chart-bar me-2 text-warning"></i>Analisis Profitabilitas
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card border-0">
+                <div class="card-body p-4">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-lg-8">
+                            
+                            <p class="text-muted mb-0">Gunakan menu "Closing Period" secara rutin untuk memastikan laporan keuangan tetap akurat dan terkontrol.</p>
+                        </div>
+                        <div class="col-lg-4 text-lg-end">
+                            <a href="{% url 'ledger:closing_period_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-calendar-day me-1"></i> Kelola Periode Penutupan
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Laporan Neraca</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-4 mb-5">
+
+    <h2 class="mb-4">Laporan Neraca</h2>
+
+    <!-- Pilihan Periode Closing -->
+   <form method="get" class="mb-3">
+  <label for="period">Periode:</label>
+  <select name="period" id="period" onchange="this.form.submit()">
+    {% for p in periods %}
+      <option value="{{ p.period }}" {% if p.period == selected_period %}selected{% endif %}>
+        {{ p.period }} {% if p.is_closed %}(Closed){% else %}(Open){% endif %}
+      </option>
+    {% endfor %}
+  </select>
+</form>
+
+
+    <p><strong>Periode Ditampilkan:</strong> {{ selected_period }}</p>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h4>Aset</h4>
+            <table class="table table-sm table-bordered">
+                <tbody>
+                {% for item in assets %}
+                    <tr>
+                        <td>{{ item.account.account_name }}</td>
+                        <td class="text-end">{{ item.balance|intcomma }}</td>
+                    </tr>
+                {% endfor %}
+                <tr class="fw-bold table-success">
+                    <td>Total Aset</td>
+                    <td class="text-end">{{ total_assets|intcomma }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-4">
+            <h4>Kewajiban</h4>
+            <table class="table table-sm table-bordered">
+                <tbody>
+                {% for item in liabilities %}
+                    <tr>
+                        <td>{{ item.account.account_name }}</td>
+                        <td class="text-end">{{ item.balance|intcomma }}</td>
+                    </tr>
+                {% endfor %}
+                <tr class="fw-bold table-warning">
+                    <td>Total Kewajiban</td>
+                    <td class="text-end">{{ total_liabilities|intcomma }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-4">
+            <h4>Ekuitas</h4>
+            <table class="table table-sm table-bordered">
+                <tbody>
+                {% for item in equities %}
+                    <tr>
+                        <td>{{ item.account.account_name }}</td>
+                        <td class="text-end">{{ item.balance|intcomma }}</td>
+                    </tr>
+                {% endfor %}
+                <tr class="fw-bold table-info">
+                    <td>Total Ekuitas</td>
+                    <td class="text-end">{{ total_equities|intcomma }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h5>Total Kewajiban + Ekuitas: {{ total_liabilities_equities|intcomma }}</h5>
+        <h5>Total Aset: {{ total_assets|intcomma }}</h5>
+        {% if total_assets != total_liabilities_equities %}
+            <div class="alert alert-warning mt-2">⚠ Neraca tidak seimbang!</div>
+        {% else %}
+            <div class="alert alert-success mt-2">✅ Neraca seimbang.</div>
+        {% endif %}
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+
+
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% load sidebar_menu %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="content">
+    <h1>Selamat datang di Dashboard</h1>
+    <p>Silakan pilih menu dari sisi kiri.</p>
+    
+    <!-- Konten dashboard Anda di sini -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Ringkasan</h5>
+                    <p class="card-text">Ini adalah halaman dashboard utama Anda.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
