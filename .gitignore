@@ -1,0 +1,88 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Django
+# =========================
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Media & Static (hasil collectstatic)
+media/
+staticfiles/
+
+# =========================
+# Environment & Secrets
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Virtual Environment
+# =========================
+venv/
+env/
+.venv/
+.python-version
+
+venvl/
+envl/
+.venvl
+.venv/
+.envl/
+.python-version
+
+
+# =========================
+# Migrations (opsional)
+# Jika ingin versioning migration, HAPUS bagian ini
+# =========================
+**/migrations/
+!**/migrations/__init__.py
+
+# =========================
+# IDE & Editor
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Testing & Coverage
+# =========================
+.coverage
+htmlcov/
+.pytest_cache/
+
+# =========================
+# Build & Packaging
+# =========================
+build/
+dist/
+*.egg-info/
+
+# =========================
+# Node (jika pakai frontend)
+# =========================
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# =========================
+# Logs
+# =========================
+*.log
