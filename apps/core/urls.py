@@ -12,9 +12,6 @@ from .views.company_views import (
 )
 from .views.index_views import index, pricing, checkout, payment
 from .views.user_views import ListUserView, EditUserView, user_profile
-from .views.anggota_views import AnggotaListView, AnggotaCreateView, AnggotaUpdateView, PublicAnggotaCreateView, approve_anggota, reject_anggota
-
-app_name = 'anggota'
 
 index_pattern = (
     [
@@ -50,26 +47,13 @@ user_pattern = (
     'user'
 )
 
-anggota_pattern = (
-    [
-        path('', AnggotaListView.as_view(), name="list"),
-        path('tambah/', AnggotaCreateView.as_view(), name="create"),
-        path('<int:pk>/edit/', AnggotaUpdateView.as_view(), name="update"),
-        path('<int:pk>/approve/', approve_anggota, name="approve"),
-        path('<int:pk>/reject/', reject_anggota, name="reject"),
-    ]
-)
 
-public_pattern = (
-    [
-        path('pendaftaran/', PublicAnggotaCreateView.as_view(), name="public_create"),
-    ]
-)
+
 
 urlpatterns = [
     path('', include(index_pattern)),
-    path('', include(public_pattern)),
+
     path('company/', include(company_pattern)),
     path('user/', include(user_pattern)),
-    path('anggota/', include(anggota_pattern)),
+  
 ]
