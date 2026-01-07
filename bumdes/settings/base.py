@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pymysql
 
+pymysql.version_info = (2, 2, 1, "final", 0)
 pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

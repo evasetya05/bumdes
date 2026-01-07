@@ -6,10 +6,6 @@ ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.102', 'localhost']
 CSRF_TRUSTED_ORIGINS = ['https://*.preview.app.github.dev']
 
 
-import pymysql
-pymysql.install_as_MySQLdb()
-
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
