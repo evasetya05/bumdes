@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from ledger.models import JournalEntry, JournalItem, Account, ClosingPeriod
+from apps.modules.ledger.models import JournalEntry, JournalItem, Account, ClosingPeriod
 from django.utils.timezone import now
 from datetime import datetime
 from django.contrib import messages

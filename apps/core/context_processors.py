@@ -11,6 +11,6 @@ def company_info(request):
             context['company_name'] = company.name
     except Exception as e:
         # Fallback to default name if company doesn't exist
-        context['company_name'] = "ERP Lab"
+        context['company_name'] = "BUMDES"
     
     return context

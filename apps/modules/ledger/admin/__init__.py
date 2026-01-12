@@ -1,12 +1,12 @@
-from ledger.models import *
-from ledger.admin import *
+from apps.modules.ledger.models import *
+from apps.modules.ledger.admin import *
 from .account import *
 from .ledger_report import *
 
 
 from django.contrib import admin
 from django.utils import timezone
-from ledger.models import ClosingPeriod
+from apps.modules.ledger.models import ClosingPeriod
 
 
 @admin.register(ClosingPeriod)

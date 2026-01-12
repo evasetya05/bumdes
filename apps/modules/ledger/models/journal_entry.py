@@ -1,5 +1,5 @@
 from django.db import models
-from ledger.models.account import Account
+from apps.modules.ledger.models.account import Account
 
 class JournalEntry(models.Model):
     date = models.DateField()

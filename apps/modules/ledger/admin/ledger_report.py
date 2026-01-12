@@ -1,5 +1,5 @@
 from django.contrib import admin
-from ledger.models import  JournalItem
+from apps.modules.ledger.models import  JournalItem
 
 
 @admin.register(JournalItem)

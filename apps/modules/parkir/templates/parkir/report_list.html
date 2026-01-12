@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Laporan Parkir Harian</h2>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Tanggal</th>
+        <th>Total Bruto</th>
+        <th>Status</th>
+        <th>Aksi</th>
+    </tr>
+
+    {% for r in reports %}
+    <tr>
+        <td>{{ r.date }}</td>
+        <td>{{ r.total_bruto|floatformat:0 }}</td>
+        <td>
+            {% if r.status == 'posted' %}
+                <span style="color:green;">POSTED</span>
+            {% else %}
+                <span style="color:orange;">DRAFT</span>
+            {% endif %}
+        </td>
+        <td>
+            <a href="{% url 'parkir:report_detail' r.id %}">Detail</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">Belum ada data</td></tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

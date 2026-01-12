@@ -1,5 +1,5 @@
 from django import template
-from ledger.models import ClosingPeriod
+from apps.modules.ledger.models import ClosingPeriod
 
 register = template.Library()
 

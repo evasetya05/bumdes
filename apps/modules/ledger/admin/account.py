@@ -1,5 +1,5 @@
 from django.contrib import admin
-from ledger.models import Account, JournalEntry, JournalItem
+from apps.modules.ledger.models import Account, JournalEntry, JournalItem
 
 class JournalItemInline(admin.TabularInline):
     model = JournalItem

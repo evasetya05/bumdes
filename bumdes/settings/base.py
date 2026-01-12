@@ -11,13 +11,7 @@ pymysql.install_as_MySQLdb()
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Add the apps directories to the Python path
-APPS_DIR = os.path.join(BASE_DIR, 'apps')
-APPS_MODULES_DIR = os.path.join(APPS_DIR, 'modules')
 
-# Add to Python path if not already there
-for path in [APPS_DIR, APPS_MODULES_DIR]:
-    if path not in sys.path:
-        sys.path.insert(0, path)
 
 SECRET_KEY = os.getenv('SECRET_KEY', '&9b7(-8cp5)mkz4j8kz*o_%njy944qn1p69ojdz35ui97)_ai8')
 
@@ -25,7 +19,7 @@ ALLOWED_HOSTS = []
 CSRF_TRUSTED_ORIGINS = []
 
 INSTALLED_APPS = [
-    'accounts',
+    'apps.accounts',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,8 +36,8 @@ INSTALLED_APPS = [
 
 
     'apps.modules.ledger',
-    'extras',
-    'users',
+    'apps.extras',
+    'apps.users',
     
    
 ]

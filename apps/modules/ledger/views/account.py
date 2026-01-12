@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
-from ledger.models import Account
-from ledger.forms import AccountForm
+from apps.modules.ledger.models import Account
+from apps.modules.ledger.forms import AccountForm
 
 def account_list(request):
     accounts = Account.objects.all()

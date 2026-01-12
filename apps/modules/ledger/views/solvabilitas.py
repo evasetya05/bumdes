@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from ledger.models import Account, JournalItem, ClosingPeriod
+from apps.modules.ledger.models import Account, JournalItem, ClosingPeriod
 
 def get_balance_by_prefix(prefixes, period):
     """

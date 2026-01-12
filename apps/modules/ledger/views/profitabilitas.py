@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.db.models import Sum
-from ledger.models.account import Account
-from ledger.models.journal_entry import JournalItem
-from ledger.models.closing_period import ClosingPeriod
+from apps.modules.ledger.models.account import Account
+from apps.modules.ledger.models.journal_entry import JournalItem
+from apps.modules.ledger.models.closing_period import ClosingPeriod
 
 
 def profitabilitas_view(request):

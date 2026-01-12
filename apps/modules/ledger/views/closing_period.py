@@ -4,8 +4,8 @@ from django.contrib import messages
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.db.models import Sum
-from ledger.models.closing_period import ClosingPeriod
-from ledger.models import JournalEntry, JournalItem, Account
+from apps.modules.ledger.models.closing_period import ClosingPeriod
+from apps.modules.ledger.models import JournalEntry, JournalItem, Account
 
 
 def closing_period_list(request):

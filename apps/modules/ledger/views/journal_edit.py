@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from ledger.models import JournalEntry, JournalItem, Account
+from apps.modules.ledger.models import JournalEntry, JournalItem, Account
 
 def journal_edit(request, pk):
     journal = get_object_or_404(JournalEntry, pk=pk)

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Laporan Parkir {{ report.date }}</h2>
+
+<p>Status:
+    {% if report.status == 'posted' %}
+        <strong style="color:green;">POSTED</strong>
+    {% else %}
+        <strong style="color:orange;">DRAFT</strong>
+    {% endif %}
+</p>
+
+<hr>
+
+<h3>Tiket</h3>
+<table border="1" cellpadding="6">
+    <tr>
+        <th>Jenis</th>
+        <th>Seri</th>
+        <th>Qty</th>
+        <th>Subtotal</th>
+    </tr>
+    {% for t in tickets %}
+    <tr>
+        <td>{{ t.ticket_type.name }}</td>
+        <td>{{ t.start_serial }} - {{ t.end_serial }}</td>
+        <td>{{ t.quantity }}</td>
+        <td>{{ t.subtotal|floatformat:0 }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>Biaya Operasional</h3>
+<table border="1" cellpadding="6">
+    <tr>
+        <th>Keterangan</th>
+        <th>Jumlah</th>
+    </tr>
+    {% for e in expenses %}
+    <tr>
+        <td>{{ e.description }}</td>
+        <td>{{ e.amount|floatformat:0 }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="2">Tidak ada biaya</td></tr>
+    {% endfor %}
+</table>
+
+<hr>
+
+<h3>Ringkasan</h3>
+<ul>
+    <li>Total Bruto: <strong>{{ total_bruto|floatformat:0 }}</strong></li>
+    <li>Total Biaya: <strong>{{ total_expense|floatformat:0 }}</strong></li>
+    <li>Kas Bersih: <strong>{{ net_cash|floatformat:0 }}</strong></li>
+</ul>
+
+{% if report.status == 'draft' %}
+<form method="post" action="{% url 'parkir:post_to_ledger' report.id %}">
+    {% csrf_token %}
+    <button type="submit"
+        onclick="return confirm('Yakin posting ke Ledger? Data tidak bisa diubah!')">
+        POST KE LEDGER
+    </button>
+</form>
+{% else %}
+<p>Journal Ref: {{ report.journal_entry_id }}</p>
+{% endif %}
+
+<a href="{% url 'parkir:report_list' %}">← Kembali</a>
+
+{% endblock %}
