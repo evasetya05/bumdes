@@ -19,6 +19,7 @@ class ParkingDailyReport(models.Model):
     )
 
     date = models.DateField(unique=True)
+    description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
 
     created_by = models.ForeignKey(
@@ -43,8 +44,9 @@ class ParkingTicketItem(models.Model):
 
     start_serial = models.IntegerField()
     end_serial = models.IntegerField()
-
-  
+    lembar = models.IntegerField(default=0, blank=True, null=True)
+    jumlah = models.DecimalField(max_digits=12, decimal_places=0, default=0)
+    description = models.CharField(max_length=255, blank=True, null=True)
 
     def quantity(self):
         return self.end_serial - self.start_serial + 1

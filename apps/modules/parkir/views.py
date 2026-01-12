@@ -3,13 +3,75 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 
 from .models import (
     ParkingDailyReport,
     ParkingTicketItem,
     ParkingExpense,
+    TicketType,
 )
 from .services import post_parking_daily_report
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+
+from .models import ParkingDailyReport
+from .forms import (
+    ParkingDailyReportForm,
+    TicketItemFormSet,
+    ExpenseFormSet
+)
+
+def parkir_index(request):
+      return render(request, 'parkir/index.html', {
+    })
+
+@require_GET
+def get_ticket_price(request):
+    """API endpoint untuk mendapatkan harga tiket"""
+    ticket_type_id = request.GET.get('ticket_type_id')
+    if ticket_type_id:
+        try:
+            ticket_type = TicketType.objects.get(id=ticket_type_id)
+            return JsonResponse({'price': float(ticket_type.price)})
+        except TicketType.DoesNotExist:
+            return JsonResponse({'error': 'Ticket type not found'}, status=404)
+    return JsonResponse({'error': 'Missing ticket_type_id'}, status=400)
+
+@login_required
+def parking_daily_report_create(request):
+    if request.method == 'POST':
+        report_form = ParkingDailyReportForm(request.POST)
+        if report_form.is_valid():
+            report = report_form.save(commit=False)
+            report.created_by = request.user
+            report.save()
+
+            ticket_formset = TicketItemFormSet(request.POST, instance=report)
+            expense_formset = ExpenseFormSet(request.POST, instance=report)
+
+            if ticket_formset.is_valid() and expense_formset.is_valid():
+                ticket_formset.save()
+                expense_formset.save()
+                return redirect('parkir:report_detail', report.id)
+        else:
+            ticket_formset = TicketItemFormSet(request.POST)
+            expense_formset = ExpenseFormSet(request.POST)
+    else:
+        report_form = ParkingDailyReportForm()
+        ticket_formset = TicketItemFormSet()
+        expense_formset = ExpenseFormSet()
+
+    return render(request, 'parkir/daily_report_form.html', {
+        'report_form': report_form,
+        'ticket_formset': ticket_formset,
+        'expense_formset': expense_formset,
+    })
+
 
 @login_required
 def report_list(request):

@@ -1,0 +1,233 @@
+{% load static %}
+
+{% block content %}
+<h2>Laporan Harian Parkir</h2>
+
+<!-- Flatpickr -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<form method="post">
+    {% csrf_token %}
+
+    <fieldset>
+        <legend>📅 Data Laporan</legend>
+
+        <div style="margin-bottom: 15px;">
+            <label>Tanggal</label><br>
+            <input type="text"
+                   name="date"
+                   id="id_date"
+                   value="{{ report_form.date.value|default:'' }}"
+                   placeholder="dd/mm/yyyy"
+                   required>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>Keterangan</label><br>
+            <textarea name="description" 
+                      id="id_description"
+                      rows="3"
+                      style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
+        </div>
+    </fieldset>
+
+    <hr>
+
+    <fieldset>
+        <legend>🎟️ Tiket Parkir</legend>
+
+        {{ ticket_formset.management_form }}
+
+        <table border="1" cellpadding="5" id="ticket-table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>Jenis Tiket</th>
+                    <th>Seri Awal</th>
+                    <th>Seri Akhir</th>
+                    <th>Lembar</th>
+                    <th>Harga</th>
+                    <th>Jumlah</th>
+                    <th>Keterangan</th>
+                    <th>Hapus</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in ticket_formset %}
+                <tr class="ticket-form" data-form-index="{{ forloop.counter0 }}" {% if forloop.counter0 > 0 and not form.instance.pk and not form.has_changed and not form.errors %}style="display:none"{% endif %}>
+                    {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+                    <td>{{ form.ticket_type }}</td>
+                    <td>{{ form.start_serial }}</td>
+                    <td>{{ form.end_serial }}</td>
+                    <td>{{ form.lembar }}</td>
+                    <td><span class="price" data-price="0">0</span></td>
+                    <td><span class="subtotal" data-subtotal="0">0</span></td>
+                    <td>{{ form.description }}</td>
+                    <td>{{ form.DELETE }}</td>
+                </tr>
+                {% empty %}
+                <tr class="ticket-form" data-form-index="0">
+                    <td><select name="ticketitem_set-0-ticket_type" class="ticket-type-select"></select></td>
+                    <td><input type="number" name="ticketitem_set-0-start_serial" class="start-serial" style="width: 80px;"></td>
+                    <td><input type="number" name="ticketitem_set-0-end_serial" class="end-serial" style="width: 80px;"></td>
+                    <td><input type="number" name="ticketitem_set-0-lembar" class="lembar" style="width: 80px;" min="0"></td>
+                    <td><span class="price" data-price="0">0</span></td>
+                    <td><span class="subtotal" data-subtotal="0">0</span></td>
+                    <td><input type="text" name="ticketitem_set-0-description" style="width: 150px;"></td>
+                    <td><input type="checkbox" name="ticketitem_set-0-DELETE"></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <br>
+        <button type="button" id="add-ticket" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">➕ Tambah Tiket</button>
+    </fieldset>
+
+    <hr>
+
+    <fieldset>
+        <legend>💸 Pengeluaran</legend>
+
+        {{ expense_formset.management_form }}
+
+        <table border="1" cellpadding="5">
+            <tr>
+                <th>Keterangan</th>
+                <th>Jumlah</th>
+                <th>Hapus</th>
+            </tr>
+            {% for form in expense_formset %}
+            <tr>
+                <td>{{ form.description }}</td>
+                <td>{{ form.amount }}</td>
+                <td>{{ form.DELETE }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </fieldset>
+
+    <br>
+    <button type="submit">💾 Simpan Laporan</button>
+</form>
+
+<!-- JS -->
+<script>
+/* Date Picker */
+flatpickr("#id_date", {
+    dateFormat: "d/m/Y",
+    allowInput: true
+});
+
+// Ticket Type Price API URL
+const priceApiUrl = "{% url 'parkir:ticket_price' %}";
+
+// Initialize ticket rows
+function initializeTicketRow(row, formIndex) {
+    const ticketTypeSelect = row.querySelector('[name*="-ticket_type"]');
+    const lembarInput = row.querySelector('[name*="-lembar"]');
+    const priceSpan = row.querySelector('.price');
+    const subtotalSpan = row.querySelector('.subtotal');
+
+    // Handle ticket type change
+    if (ticketTypeSelect) {
+        ticketTypeSelect.addEventListener('change', function() {
+            const ticketTypeId = this.value;
+            if (ticketTypeId) {
+                fetch(priceApiUrl + '?ticket_type_id=' + ticketTypeId)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.price !== undefined) {
+                            priceSpan.textContent = parseFloat(data.price).toLocaleString('id-ID', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                            priceSpan.setAttribute('data-price', data.price);
+                            calculateSubtotal(row);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else {
+                priceSpan.textContent = '0';
+                priceSpan.setAttribute('data-price', '0');
+                subtotalSpan.textContent = '0';
+            }
+        });
+    }
+
+    // Handle lembar input change
+    if (lembarInput) {
+        lembarInput.addEventListener('input', function() {
+            calculateSubtotal(row);
+        });
+    }
+}
+
+function calculateSubtotal(row) {
+    const priceSpan = row.querySelector('.price');
+    const lembarInput = row.querySelector('[name*="-lembar"]');
+    const subtotalSpan = row.querySelector('.subtotal');
+    
+    const price = parseFloat(priceSpan.getAttribute('data-price')) || 0;
+    const lembar = parseFloat(lembarInput.value) || 0;
+    const subtotal = price * lembar;
+    
+    subtotalSpan.textContent = subtotal.toLocaleString('id-ID', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
+    subtotalSpan.setAttribute('data-subtotal', subtotal);
+}
+
+// Initialize existing rows
+document.querySelectorAll('.ticket-form').forEach((row, index) => {
+    initializeTicketRow(row, index);
+});
+
+/* Add Ticket Row */
+document.getElementById('add-ticket').addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const tableBody = document.querySelector('#ticket-table tbody');
+    const totalForms = document.getElementById('id_ticketitem_set-TOTAL_FORMS');
+
+    const formIndex = parseInt(totalForms.value);
+    const firstRow = document.querySelector('.ticket-form');
+    const newRow = firstRow.cloneNode(true);
+
+    // Set new attributes for the cloned row
+    newRow.setAttribute('data-form-index', formIndex);
+    
+    // Update all form field names
+    newRow.querySelectorAll('input, select, textarea').forEach(el => {
+        const name = el.name;
+        if (name) {
+            el.name = name.replace(/-\d+(-|_)/, `-${formIndex}$1`);
+        }
+        
+        // Clear values
+        if (el.type !== 'checkbox' && el.type !== 'hidden') {
+            el.value = '';
+        }
+        if (el.type === 'checkbox') {
+            el.checked = false;
+        }
+    });
+
+    // Reset price and subtotal display
+    newRow.querySelector('.price').textContent = '0';
+    newRow.querySelector('.price').setAttribute('data-price', '0');
+    newRow.querySelector('.subtotal').textContent = '0';
+    newRow.querySelector('.subtotal').setAttribute('data-subtotal', '0');
+
+    // Add row to table
+    tableBody.appendChild(newRow);
+    totalForms.value = formIndex + 1;
+    
+    // Initialize the new row
+    initializeTicketRow(newRow, formIndex);
+});
+</script>
+
+{% endblock %}

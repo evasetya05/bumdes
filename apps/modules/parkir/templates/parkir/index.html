@@ -1,0 +1,70 @@
+
+
+{% block content %}
+<h2>🚗 Aplikasi Parkir</h2>
+<p>Menu utama pengelolaan parkir</p>
+
+<style>
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.menu-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 18px;
+    text-decoration: none;
+    color: #333;
+    background: #fafafa;
+    transition: 0.2s ease-in-out;
+}
+
+.menu-card:hover {
+    background: #eef6ff;
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+}
+
+.menu-icon {
+    font-size: 34px;
+}
+
+.menu-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.menu-desc {
+    font-size: 14px;
+    color: #666;
+    margin-top: 4px;
+}
+</style>
+
+<div class="menu-grid">
+
+    <!-- Input Laporan Harian -->
+    <a href="{% url 'parkir:daily_report_create' %}" class="menu-card">
+        <div class="menu-icon">📝</div>
+        <div class="menu-title">Input Laporan Harian</div>
+        <div class="menu-desc">
+            Tambah laporan parkir harian beserta tiket & pengeluaran
+        </div>
+    </a>
+
+    <!-- Daftar Laporan -->
+    <a href="{% url 'parkir:report_list' %}" class="menu-card">
+        <div class="menu-icon">📋</div>
+        <div class="menu-title">Daftar Laporan</div>
+        <div class="menu-desc">
+            Lihat detail laporan dan posting ke ledger
+        </div>
+    </a>
+
+</div>
+
+{% endblock %}

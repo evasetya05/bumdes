@@ -6,7 +6,8 @@ register = template.Library()
 def create_menu(user):
     menu_items = [
         {'label': 'Pembukuan', 'url': 'ledger:ledger_index', 'icon': 'fas fa-book'},
-        {'label': 'Parkir', 'url': 'parkir:report_list', 'icon': 'fas fa-book'},
+        {'label': 'Parkir', 'url': 'parkir:index', 'icon': 'fas fa-book'},
+        
     ]
 
     return menu_items
