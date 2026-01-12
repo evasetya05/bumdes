@@ -3,7 +3,7 @@ from django.db import transaction
 from django.utils import timezone
 from decimal import Decimal
 
-from apps.ledger.models import JournalEntry, JournalItem, Account
+from apps.modules.ledger.models import JournalEntry, JournalItem, Account
 from .models import ParkingDailyReport, ParkingRevenueRule
 
 def post_parking_daily_report(report_id):

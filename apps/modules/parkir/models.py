@@ -7,7 +7,7 @@ class TicketType(models.Model):
     is_active = models.BooleanField(default=True)
 
     class Meta:
-        app_label = 'apps.modules.parkir'
+        app_label = 'parkir'
 
     def __str__(self):
         return self.name
@@ -30,8 +30,7 @@ class ParkingDailyReport(models.Model):
             help_text="ID JournalEntry di Ledger"
         )
 
-    class Meta:
-        app_label = 'apps.modules.parkir'
+ 
 
     def total_bruto(self):
         return sum(i.subtotal() for i in self.items.all())
@@ -45,8 +44,7 @@ class ParkingTicketItem(models.Model):
     start_serial = models.IntegerField()
     end_serial = models.IntegerField()
 
-    class Meta:
-        app_label = 'apps.modules.parkir'
+  
 
     def quantity(self):
         return self.end_serial - self.start_serial + 1
@@ -61,8 +59,7 @@ class ParkingExpense(models.Model):
     description = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
 
-    class Meta:
-        app_label = 'apps.modules.parkir'
+    
 
 class ParkingRevenueRule(models.Model):
     name = models.CharField(max_length=100)  # Pajak, KTH, Dusun, dll
@@ -75,5 +72,3 @@ class ParkingRevenueRule(models.Model):
 
     is_active = models.BooleanField(default=True)
 
-    class Meta:
-        app_label = 'apps.modules.parkir'

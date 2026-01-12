@@ -10,6 +10,7 @@ urlpatterns = [
     path('accounts/', include('apps.accounts.urls', namespace='accounts')),
     path('users/', include('apps.users.urls', namespace='users')),
     path('ledger/', include('apps.modules.ledger.urls', namespace='ledger')),
+    path('parkir/', include('apps.modules.parkir.urls', namespace='parkir')),
     # Anda mungkin perlu menambahkan URL untuk aplikasi lain di sini
     path('', include('apps.core.urls')), # Untuk dashboard, dll.
 ]

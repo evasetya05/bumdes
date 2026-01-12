@@ -36,6 +36,7 @@ INSTALLED_APPS = [
 
 
     'apps.modules.ledger',
+    'apps.modules.parkir',
     'apps.extras',
     'apps.users',
     
