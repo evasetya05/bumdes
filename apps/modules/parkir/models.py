@@ -40,11 +40,14 @@ class ParkingTicketItem(models.Model):
     report = models.ForeignKey(
         ParkingDailyReport, related_name='items', on_delete=models.CASCADE
     )
-    ticket_type = models.ForeignKey(TicketType, on_delete=models.PROTECT)
+    revenue_account = models.ForeignKey(
+        'ledger.Account', on_delete=models.PROTECT, limit_choices_to={'account_type': 'INCOME'}
+    )
 
     start_serial = models.IntegerField()
     end_serial = models.IntegerField()
     lembar = models.IntegerField(default=0, blank=True, null=True)
+    price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     jumlah = models.DecimalField(max_digits=12, decimal_places=0, default=0)
     description = models.CharField(max_length=255, blank=True, null=True)
 
@@ -52,13 +55,19 @@ class ParkingTicketItem(models.Model):
         return self.end_serial - self.start_serial + 1
 
     def subtotal(self):
-        return self.quantity() * self.ticket_type.price
+        return self.quantity() * self.price
 
 class ParkingExpense(models.Model):
     report = models.ForeignKey(
         ParkingDailyReport, related_name='expenses', on_delete=models.CASCADE
     )
+    expense_account = models.ForeignKey(
+        'ledger.Account', on_delete=models.PROTECT, limit_choices_to={'account_type': 'EXPENSE'}
+    )
     description = models.CharField(max_length=255)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    unit = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    nominal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
 
     

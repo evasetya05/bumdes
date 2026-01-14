@@ -1,13 +1,12 @@
-
 {% block content %}
 
 <h2>Laporan Parkir {{ report.date }}</h2>
 
 <p>Status:
     {% if report.status == 'posted' %}
-        <strong style="color:green;">POSTED</strong>
+    <strong style="color:green;">POSTED</strong>
     {% else %}
-        <strong style="color:orange;">DRAFT</strong>
+    <strong style="color:orange;">DRAFT</strong>
     {% endif %}
 </p>
 
@@ -16,14 +15,14 @@
 <h3>Tiket</h3>
 <table border="1" cellpadding="6">
     <tr>
-        <th>Jenis</th>
+        <th>Akun</th>
         <th>Seri</th>
         <th>Qty</th>
         <th>Subtotal</th>
     </tr>
     {% for t in tickets %}
     <tr>
-        <td>{{ t.ticket_type.name }}</td>
+        <td>{{ t.revenue_account.account_name }}</td>
         <td>{{ t.start_serial }} - {{ t.end_serial }}</td>
         <td>{{ t.quantity }}</td>
         <td>{{ t.subtotal|floatformat:0 }}</td>
@@ -34,16 +33,26 @@
 <h3>Biaya Operasional</h3>
 <table border="1" cellpadding="6">
     <tr>
+        <th>Akun Biaya</th>
         <th>Keterangan</th>
+        <th>Persentase (%)</th>
+        <th>Unit</th>
+        <th>Nominal</th>
         <th>Jumlah</th>
     </tr>
     {% for e in expenses %}
     <tr>
+        <td>{{ e.expense_account.account_name }}</td>
         <td>{{ e.description }}</td>
+        <td>{{ e.percentage|default:"-" }}</td>
+        <td>{{ e.unit|default:"-" }}</td>
+        <td>{{ e.nominal|floatformat:0 }}</td>
         <td>{{ e.amount|floatformat:0 }}</td>
     </tr>
     {% empty %}
-    <tr><td colspan="2">Tidak ada biaya</td></tr>
+    <tr>
+        <td colspan="6">Tidak ada biaya</td>
+    </tr>
     {% endfor %}
 </table>
 
@@ -57,10 +66,15 @@
 </ul>
 
 {% if report.status == 'draft' %}
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'parkir:daily_report_update' report.id %}"
+        style="padding: 8px 16px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 4px;">✏️
+        Edit Laporan</a>
+</div>
+
 <form method="post" action="{% url 'parkir:post_to_ledger' report.id %}">
     {% csrf_token %}
-    <button type="submit"
-        onclick="return confirm('Yakin posting ke Ledger? Data tidak bisa diubah!')">
+    <button type="submit" onclick="return confirm('Yakin posting ke Ledger? Data tidak bisa diubah!')">
         POST KE LEDGER
     </button>
 </form>

@@ -13,15 +13,25 @@ class ParkingDailyReportForm(forms.ModelForm):
 
 
 class ParkingTicketItemForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from apps.modules.ledger.models import Account
+        self.fields['revenue_account'].queryset = Account.objects.filter(account_type='INCOME')
+
     class Meta:
         model = ParkingTicketItem
-        fields = ['ticket_type', 'start_serial', 'end_serial', 'lembar', 'description']
+        fields = ['revenue_account', 'start_serial', 'end_serial', 'lembar', 'price', 'description']
 
 
 class ParkingExpenseForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from apps.modules.ledger.models import Account
+        self.fields['expense_account'].queryset = Account.objects.filter(account_type='EXPENSE')
+
     class Meta:
         model = ParkingExpense
-        fields = ['description', 'amount']
+        fields = ['expense_account', 'description', 'percentage', 'unit', 'nominal', 'amount']
 
 
 TicketItemFormSet = inlineformset_factory(
@@ -36,6 +46,6 @@ ExpenseFormSet = inlineformset_factory(
     ParkingDailyReport,
     ParkingExpense,
     form=ParkingExpenseForm,
-    extra=2,
+    extra=1,
     can_delete=True
 )

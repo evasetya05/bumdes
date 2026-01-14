@@ -8,7 +8,7 @@
     <div class="col-lg-12">
         <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">Daftar Anggota Koperasi</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Daftar Anggota BUMDES</h6>
                 <div class="d-flex align-items-center">
                     <span class="badge bg-info me-2">{{ anggota_list|length }} Anggota</span>
                     <a href="{% url 'anggota:create' %}" class="btn btn-primary btn-sm">
@@ -39,15 +39,16 @@
                                 <td><small>{{ anggota.nik }}</small></td>
                                 <td>
                                     <div class="fw-bold">{{ anggota.nama_lengkap }}</div>
-                                    {% if anggota.no_hp %}<small class="text-muted">{{ anggota.no_hp }}</small>{% endif %}
+                                    {% if anggota.no_hp %}<small class="text-muted">{{ anggota.no_hp }}</small>{% endif
+                                    %}
                                 </td>
                                 <td class="text-center">
                                     {% if anggota.jenis_kelamin == 'L' %}
-                                        <span class="badge bg-primary">L</span>
+                                    <span class="badge bg-primary">L</span>
                                     {% elif anggota.jenis_kelamin == 'P' %}
-                                        <span class="badge bg-danger">P</span>
+                                    <span class="badge bg-danger">P</span>
                                     {% else %}
-                                        -
+                                    -
                                     {% endif %}
                                 </td>
                                 <td><small>{{ anggota.email|truncatechars:20 }}</small></td>
@@ -56,26 +57,29 @@
                                 </td>
                                 <td class="text-center">
                                     {% if anggota.status_verifikasi == 'verified' %}
-                                        <span class="badge bg-success">Terverifikasi</span>
+                                    <span class="badge bg-success">Terverifikasi</span>
                                     {% else %}
-                                        <span class="badge bg-warning">Pending</span>
+                                    <span class="badge bg-warning">Pending</span>
                                     {% endif %}
                                 </td>
                                 <td><small>{{ anggota.tanggal_daftar|date:"d/m/y" }}</small></td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group">
-                                        <a href="{% url 'anggota:update' anggota.pk %}" class="btn btn-sm btn-primary" title="Edit">
+                                        <a href="{% url 'anggota:update' anggota.pk %}" class="btn btn-sm btn-primary"
+                                            title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         {% if user.is_staff or user.is_superuser %}
-                                            {% if anggota.status_verifikasi == 'pending' %}
-                                                <a href="{% url 'anggota:approve' anggota.pk %}" class="btn btn-sm btn-success" title="Setujui">
-                                                    <i class="fas fa-check"></i>
-                                                </a>
-                                                <a href="{% url 'anggota:reject' anggota.pk %}" class="btn btn-sm btn-danger" title="Tolak">
-                                                    <i class="fas fa-times"></i>
-                                                </a>
-                                            {% endif %}
+                                        {% if anggota.status_verifikasi == 'pending' %}
+                                        <a href="{% url 'anggota:approve' anggota.pk %}" class="btn btn-sm btn-success"
+                                            title="Setujui">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                        <a href="{% url 'anggota:reject' anggota.pk %}" class="btn btn-sm btn-danger"
+                                            title="Tolak">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                        {% endif %}
                                         {% endif %}
                                     </div>
                                 </td>
@@ -95,40 +99,40 @@
                 </div>
             </div>
 
-                {% if is_paginated %}
-                <div class="d-flex justify-content-center mt-3">
-                    <nav>
-                        <ul class="pagination">
-                            {% if page_obj.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                                </li>
-                            {% endif %}
+            {% if is_paginated %}
+            <div class="d-flex justify-content-center mt-3">
+                <nav>
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                        {% endif %}
 
-                            {% for num in page_obj.paginator.page_range %}
-                                {% if page_obj.number == num %}
-                                    <li class="page-item active">
-                                        <span class="page-link">{{ num }}</span>
-                                    </li>
-                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                                    </li>
-                                {% endif %}
+                        {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <li
+                            class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
                             {% endfor %}
 
                             {% if page_obj.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                                </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
                             {% endif %}
-                        </ul>
-                    </nav>
-                </div>
-                {% endif %}
+                    </ul>
+                </nav>
             </div>
+            {% endif %}
         </div>
     </div>
+</div>
 </div>
 {% endblock %}
 
@@ -137,23 +141,31 @@
 <link href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 <style>
     @media (max-width: 768px) {
-        .table th, .table td {
+
+        .table th,
+        .table td {
             padding: 0.5rem 0.25rem;
             font-size: 0.875rem;
         }
+
         .badge {
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
         }
     }
+
     @media (max-width: 576px) {
         .card-header .badge {
             display: none;
         }
-        .table th:nth-child(5), .table td:nth-child(5) {
+
+        .table th:nth-child(5),
+        .table td:nth-child(5) {
             display: none;
         }
-        .table th:nth-child(8), .table td:nth-child(8) {
+
+        .table th:nth-child(8),
+        .table td:nth-child(8) {
             display: none;
         }
     }
@@ -165,7 +177,7 @@
 <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('.data-table').DataTable({
             "pageLength": 20,
             "ordering": true,

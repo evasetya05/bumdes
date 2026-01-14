@@ -1,7 +1,7 @@
 {% load static %}
 
 {% block content %}
-<h2>Laporan Harian Parkir</h2>
+<h2>{% if is_edit %}Edit {% endif %}Laporan Harian Parkir</h2>
 
 <!-- Flatpickr -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -15,34 +15,27 @@
 
         <div style="margin-bottom: 15px;">
             <label>Tanggal</label><br>
-            <input type="text"
-                   name="date"
-                   id="id_date"
-                   value="{{ report_form.date.value|default:'' }}"
-                   placeholder="dd/mm/yyyy"
-                   required>
-        </div>
-
-        <div style="margin-bottom: 15px;">
-            <label>Keterangan</label><br>
-            <textarea name="description" 
-                      id="id_description"
-                      rows="3"
-                      style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
+            <input type="text" name="date" id="id_date" value="{{ report_form.date.value|default:'' }}"
+                placeholder="dd/mm/yyyy" required>
         </div>
     </fieldset>
 
     <hr>
 
     <fieldset>
-        <legend>🎟️ Tiket Parkir</legend>
+        <legend>🎟️ Pendapatan</legend>
 
         {{ ticket_formset.management_form }}
+
+        <!-- Display non-field errors if any -->
+        {% if ticket_formset.non_form_errors %}
+        <div style="color:red;">{{ ticket_formset.non_form_errors }}</div>
+        {% endif %}
 
         <table border="1" cellpadding="5" id="ticket-table" style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr>
-                    <th>Jenis Tiket</th>
+                    <th>Akun Pendapatan</th>
                     <th>Seri Awal</th>
                     <th>Seri Akhir</th>
                     <th>Lembar</th>
@@ -54,34 +47,55 @@
             </thead>
             <tbody>
                 {% for form in ticket_formset %}
-                <tr class="ticket-form" data-form-index="{{ forloop.counter0 }}" {% if forloop.counter0 > 0 and not form.instance.pk and not form.has_changed and not form.errors %}style="display:none"{% endif %}>
+                <tr class="ticket-form">
                     {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
-                    <td>{{ form.ticket_type }}</td>
-                    <td>{{ form.start_serial }}</td>
-                    <td>{{ form.end_serial }}</td>
-                    <td>{{ form.lembar }}</td>
-                    <td><span class="price" data-price="0">0</span></td>
+                    <td>
+                        {{ form.revenue_account }}
+                        {% if form.revenue_account.errors %}<div style="color:red; font-size: 0.8em;">
+                            {{form.revenue_account.errors }}</div>{% endif %}
+                    </td>
+                    <td>
+                        {{ form.start_serial }}
+                        {% if form.start_serial.errors %}<div style="color:red; font-size: 0.8em;">
+                            {{form.start_serial.errors }}</div>{% endif %}
+                    </td>
+                    <td>
+                        {{ form.end_serial }}
+                        {% if form.end_serial.errors %}<div style="color:red; font-size: 0.8em;">
+                            {{form.end_serial.errors }}</div>{% endif %}
+                    </td>
+                    <td>
+                        {{ form.lembar }}
+                        {% if form.lembar.errors %}<div style="color:red; font-size: 0.8em;">{{ form.lembar.errors }}
+                        </div>{% endif %}
+                    </td>
+                    <td>
+                        {{ form.price }}
+                        {% if form.price.errors %}<div style="color:red; font-size: 0.8em;">{{ form.price.errors }}
+                        </div>{% endif %}
+                        ,</td>
                     <td><span class="subtotal" data-subtotal="0">0</span></td>
-                    <td>{{ form.description }}</td>
-                    <td>{{ form.DELETE }}</td>
-                </tr>
-                {% empty %}
-                <tr class="ticket-form" data-form-index="0">
-                    <td><select name="ticketitem_set-0-ticket_type" class="ticket-type-select"></select></td>
-                    <td><input type="number" name="ticketitem_set-0-start_serial" class="start-serial" style="width: 80px;"></td>
-                    <td><input type="number" name="ticketitem_set-0-end_serial" class="end-serial" style="width: 80px;"></td>
-                    <td><input type="number" name="ticketitem_set-0-lembar" class="lembar" style="width: 80px;" min="0"></td>
-                    <td><span class="price" data-price="0">0</span></td>
-                    <td><span class="subtotal" data-subtotal="0">0</span></td>
-                    <td><input type="text" name="ticketitem_set-0-description" style="width: 150px;"></td>
-                    <td><input type="checkbox" name="ticketitem_set-0-DELETE"></td>
+                    <td>
+                        {{ form.description }}
+                        {% if form.description.errors %}<div style="color:red; font-size: 0.8em;">
+                            {{form.description.errors }}</div>{% endif %}
+                    </td>
+                    <td>
+                        {% if ticket_formset.can_delete %}
+                        {{ form.DELETE }}
+                        {% endif %}
+                        {% if form.non_field_errors %}<div style="color:red; font-size: 0.8em;">
+                            {{form.non_field_errors}}</div>{% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
         <br>
-        <button type="button" id="add-ticket" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">➕ Tambah Tiket</button>
+        <button type="submit" name="add_ticket" value="1" formnovalidate
+            style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">➕
+            Tambah Tiket</button>
     </fieldset>
 
     <hr>
@@ -93,18 +107,62 @@
 
         <table border="1" cellpadding="5">
             <tr>
+                <th>Akun Biaya</th>
                 <th>Keterangan</th>
+                <th>Persentase (%)</th>
+                <th>Unit</th>
+                <th>Nominal</th>
                 <th>Jumlah</th>
                 <th>Hapus</th>
             </tr>
             {% for form in expense_formset %}
             <tr>
-                <td>{{ form.description }}</td>
-                <td>{{ form.amount }}</td>
-                <td>{{ form.DELETE }}</td>
+                {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+                <td>
+                    {{ form.expense_account }}
+                    {% if form.expense_account.errors %}<div style="color:red; font-size: 0.8em;">
+                        {{form.expense_account.errors }}</div>{% endif %}
+                </td>
+                <td>
+                    {{ form.description }}
+                    {% if form.description.errors %}<div style="color:red; font-size: 0.8em;">{{
+                        form.description.errors}}</div>{% endif %}
+                </td>
+                <td>
+                    {{ form.percentage }}
+                    {% if form.percentage.errors %}<div style="color:red; font-size: 0.8em;">{{ form.percentage.errors}}
+                    </div>{% endif %}
+                </td>
+                <td>
+                    {{ form.unit }}
+                    {% if form.unit.errors %}<div style="color:red; font-size: 0.8em;">{{ form.unit.errors }}</div>{%
+                    endif %}
+                </td>
+                <td>
+                    {{ form.nominal }}
+                    {% if form.nominal.errors %}<div style="color:red; font-size: 0.8em;">{{ form.nominal.errors }}
+                    </div>{% endif %}
+                </td>
+                <td>
+                    {{ form.amount }}
+                    {% if form.amount.errors %}<div style="color:red; font-size: 0.8em;">{{ form.amount.errors }}</div>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if expense_formset.can_delete %}
+                    {{ form.DELETE }}
+                    {% endif %}
+                    {% if form.non_field_errors %}<div style="color:red; font-size: 0.8em;">{{ form.non_field_errors }}
+                    </div>{% endif %}
+                </td>
             </tr>
             {% endfor %}
         </table>
+
+        <br>
+        <button type="submit" name="add_expense" value="1" formnovalidate
+            style="padding: 8px 16px; background-color: #FF9800; color: white; border: none; border-radius: 4px; cursor: pointer;">➕
+            Tambah Pengeluaran</button>
     </fieldset>
 
     <br>
@@ -113,121 +171,94 @@
 
 <!-- JS -->
 <script>
-/* Date Picker */
-flatpickr("#id_date", {
-    dateFormat: "d/m/Y",
-    allowInput: true
-});
+    /* Date Picker */
+    flatpickr("#id_date", {
+        dateFormat: "d/m/Y",
+        allowInput: true
+    });
 
-// Ticket Type Price API URL
-const priceApiUrl = "{% url 'parkir:ticket_price' %}";
+    // Initialize ticket rows
+    function initializeTicketRow(row) {
+        const lembarInput = row.querySelector('[name*="-lembar"]');
+        const priceInput = row.querySelector('[name*="-price"]');
 
-// Initialize ticket rows
-function initializeTicketRow(row, formIndex) {
-    const ticketTypeSelect = row.querySelector('[name*="-ticket_type"]');
-    const lembarInput = row.querySelector('[name*="-lembar"]');
-    const priceSpan = row.querySelector('.price');
-    const subtotalSpan = row.querySelector('.subtotal');
+        function updateSubtotal() {
+            const price = parseFloat(priceInput ? priceInput.value : 0) || 0;
+            const lembar = parseFloat(lembarInput ? lembarInput.value : 0) || 0;
+            const subtotal = price * lembar;
 
-    // Handle ticket type change
-    if (ticketTypeSelect) {
-        ticketTypeSelect.addEventListener('change', function() {
-            const ticketTypeId = this.value;
-            if (ticketTypeId) {
-                fetch(priceApiUrl + '?ticket_type_id=' + ticketTypeId)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.price !== undefined) {
-                            priceSpan.textContent = parseFloat(data.price).toLocaleString('id-ID', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
-                            });
-                            priceSpan.setAttribute('data-price', data.price);
-                            calculateSubtotal(row);
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            } else {
-                priceSpan.textContent = '0';
-                priceSpan.setAttribute('data-price', '0');
-                subtotalSpan.textContent = '0';
+            const subtotalSpan = row.querySelector('.subtotal');
+            if (subtotalSpan) {
+                subtotalSpan.textContent = subtotal.toLocaleString('id-ID', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                });
+                subtotalSpan.setAttribute('data-subtotal', subtotal);
             }
-        });
+        }
+
+        if (lembarInput) {
+            lembarInput.addEventListener('input', updateSubtotal);
+        }
+        if (priceInput) {
+            priceInput.addEventListener('input', updateSubtotal);
+        }
+
+        // Initial Calculation
+        updateSubtotal();
     }
 
-    // Handle lembar input change
-    if (lembarInput) {
-        lembarInput.addEventListener('input', function() {
-            calculateSubtotal(row);
-        });
+    // Initialize existing rows
+    document.querySelectorAll('.ticket-form').forEach((row) => {
+        initializeTicketRow(row);
+    });
+
+    // Expense Calculation
+    function initializeExpenseRow(row) {
+        const percentageInput = row.querySelector('[name*="-percentage"]');
+        const unitInput = row.querySelector('[name*="-unit"]');
+        const nominalInput = row.querySelector('[name*="-nominal"]');
+        const amountInput = row.querySelector('[name*="-amount"]');
+
+        function calculateExpense() {
+            const percentage = parseFloat(percentageInput.value) || 0;
+            const unit = parseFloat(unitInput.value) || 0;
+            const nominal = parseFloat(nominalInput.value) || 0;
+            let amount = 0;
+
+            if (percentage > 0) {
+                amount = (percentage / 100) * nominal;
+            } else if (unit > 0) {
+                amount = unit * nominal;
+            } else {
+                // If neither percentage nor unit is set, explicitly checking for direct nominal entry 
+                // might be desired, but user requirements say "jumlah adalah perkalian..."
+                // However, usually if both are empty, user might want to input amount manually.
+                // Assuming priority is given to calculation if inputs exist.
+                // If user enters manually, this logic shouldn't overwrite it unless inputs change.
+                return;
+            }
+
+            amountInput.value = amount;
+        }
+
+        if (percentageInput) percentageInput.addEventListener('input', calculateExpense);
+        if (unitInput) unitInput.addEventListener('input', calculateExpense);
+        if (nominalInput) nominalInput.addEventListener('input', calculateExpense);
     }
-}
 
-function calculateSubtotal(row) {
-    const priceSpan = row.querySelector('.price');
-    const lembarInput = row.querySelector('[name*="-lembar"]');
-    const subtotalSpan = row.querySelector('.subtotal');
-    
-    const price = parseFloat(priceSpan.getAttribute('data-price')) || 0;
-    const lembar = parseFloat(lembarInput.value) || 0;
-    const subtotal = price * lembar;
-    
-    subtotalSpan.textContent = subtotal.toLocaleString('id-ID', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+    // Initialize all existing expense rows (assuming they are in the table under "Pengeluaran")
+    // Note: We need to target the rows in the second table. 
+    // Since we didn't give the expense table an ID, lets find it or add a class.
+    // The previous edit didn't add a class to expense tr. 
+    // Let's assume we can select them via inputs. Or we can select the second table's rows.
+
+    // Better strategy: Add a class to expense rows in the form html first for robustness?
+    // Or just select all inputs with 'percentage' in name.
+    document.querySelectorAll('[name*="-percentage"]').forEach(input => {
+        const row = input.closest('tr');
+        if (row) initializeExpenseRow(row);
     });
-    subtotalSpan.setAttribute('data-subtotal', subtotal);
-}
-
-// Initialize existing rows
-document.querySelectorAll('.ticket-form').forEach((row, index) => {
-    initializeTicketRow(row, index);
-});
-
-/* Add Ticket Row */
-document.getElementById('add-ticket').addEventListener('click', function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const tableBody = document.querySelector('#ticket-table tbody');
-    const totalForms = document.getElementById('id_ticketitem_set-TOTAL_FORMS');
-
-    const formIndex = parseInt(totalForms.value);
-    const firstRow = document.querySelector('.ticket-form');
-    const newRow = firstRow.cloneNode(true);
-
-    // Set new attributes for the cloned row
-    newRow.setAttribute('data-form-index', formIndex);
-    
-    // Update all form field names
-    newRow.querySelectorAll('input, select, textarea').forEach(el => {
-        const name = el.name;
-        if (name) {
-            el.name = name.replace(/-\d+(-|_)/, `-${formIndex}$1`);
-        }
-        
-        // Clear values
-        if (el.type !== 'checkbox' && el.type !== 'hidden') {
-            el.value = '';
-        }
-        if (el.type === 'checkbox') {
-            el.checked = false;
-        }
-    });
-
-    // Reset price and subtotal display
-    newRow.querySelector('.price').textContent = '0';
-    newRow.querySelector('.price').setAttribute('data-price', '0');
-    newRow.querySelector('.subtotal').textContent = '0';
-    newRow.querySelector('.subtotal').setAttribute('data-subtotal', '0');
-
-    // Add row to table
-    tableBody.appendChild(newRow);
-    totalForms.value = formIndex + 1;
-    
-    // Initialize the new row
-    initializeTicketRow(newRow, formIndex);
-});
 </script>
 
 {% endblock %}

@@ -14,7 +14,7 @@ from .models import (
 
 @admin.register(TicketType)
 class TicketTypeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'is_active')
+    list_display = ('name', 'is_active')
     list_filter = ('is_active',)
     search_fields = ('name',)
 
@@ -33,7 +33,7 @@ class ParkingRevenueRuleAdmin(admin.ModelAdmin):
 class ParkingTicketItemInline(admin.TabularInline):
     model = ParkingTicketItem
     extra = 1
-    autocomplete_fields = ['ticket_type']
+    # autocomplete_fields = ['ticket_type']
     readonly_fields = ('quantity_display', 'subtotal_display')
 
     def quantity_display(self, obj):

@@ -1,10 +1,10 @@
-from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
+from django.utils import timezone
 
 from .models import (
     ParkingDailyReport,
@@ -13,13 +13,6 @@ from .models import (
     TicketType,
 )
 from .services import post_parking_daily_report
-
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-
-from .models import ParkingDailyReport
 from .forms import (
     ParkingDailyReportForm,
     TicketItemFormSet,
@@ -43,33 +36,67 @@ def get_ticket_price(request):
     return JsonResponse({'error': 'Missing ticket_type_id'}, status=400)
 
 @login_required
-def parking_daily_report_create(request):
-    if request.method == 'POST':
-        report_form = ParkingDailyReportForm(request.POST)
-        if report_form.is_valid():
-            report = report_form.save(commit=False)
-            report.created_by = request.user
-            report.save()
-
-            ticket_formset = TicketItemFormSet(request.POST, instance=report)
-            expense_formset = ExpenseFormSet(request.POST, instance=report)
-
-            if ticket_formset.is_valid() and expense_formset.is_valid():
-                ticket_formset.save()
-                expense_formset.save()
-                return redirect('parkir:report_detail', report.id)
-        else:
-            ticket_formset = TicketItemFormSet(request.POST)
-            expense_formset = ExpenseFormSet(request.POST)
+@login_required
+def parking_daily_report_manage(request, pk=None):
+    if pk:
+        report = get_object_or_404(ParkingDailyReport, pk=pk)
+        if report.status == 'posted':
+            messages.warning(request, "Laporan yang sudah diposting tidak dapat diedit.")
+            return redirect('parkir:report_detail', pk=pk)
     else:
-        report_form = ParkingDailyReportForm()
-        ticket_formset = TicketItemFormSet()
-        expense_formset = ExpenseFormSet()
+        report = None
+
+    ticket_prefix = 'tickets'
+    expense_prefix = 'expenses'
+
+    if request.method == 'POST':
+        report_form = ParkingDailyReportForm(request.POST, instance=report)
+        
+        # Handle "Add Ticket" button
+        if 'add_ticket' in request.POST:
+            cp = request.POST.copy()
+            cp[f'{ticket_prefix}-TOTAL_FORMS'] = int(cp.get(f'{ticket_prefix}-TOTAL_FORMS', 0)) + 1
+            ticket_formset = TicketItemFormSet(cp, instance=report_form.instance, prefix=ticket_prefix)
+            expense_formset = ExpenseFormSet(request.POST, instance=report_form.instance, prefix=expense_prefix)
+        
+        # Handle "Add Expense" button
+        elif 'add_expense' in request.POST:
+            cp = request.POST.copy()
+            cp[f'{expense_prefix}-TOTAL_FORMS'] = int(cp.get(f'{expense_prefix}-TOTAL_FORMS', 0)) + 1
+            ticket_formset = TicketItemFormSet(request.POST, instance=report_form.instance, prefix=ticket_prefix)
+            expense_formset = ExpenseFormSet(cp, instance=report_form.instance, prefix=expense_prefix)
+            
+        # Normal Submission
+        else:
+            ticket_formset = TicketItemFormSet(request.POST, instance=report_form.instance, prefix=ticket_prefix)
+            expense_formset = ExpenseFormSet(request.POST, instance=report_form.instance, prefix=expense_prefix)
+
+            if report_form.is_valid() and ticket_formset.is_valid() and expense_formset.is_valid():
+                report_obj = report_form.save(commit=False)
+                if not report_obj.pk:
+                    report_obj.created_by = request.user
+                report_obj.save()
+                
+                ticket_formset.instance = report_obj
+                ticket_formset.save()
+                
+                expense_formset.instance = report_obj
+                expense_formset.save()
+                
+                return redirect('parkir:report_detail', report_obj.id)
+            else:
+                messages.error(request, "Terdapat kesalahan. Mohon periksa kembali inputan Anda.")
+
+    else:
+        report_form = ParkingDailyReportForm(instance=report)
+        ticket_formset = TicketItemFormSet(instance=report, prefix=ticket_prefix)
+        expense_formset = ExpenseFormSet(instance=report, prefix=expense_prefix)
 
     return render(request, 'parkir/daily_report_form.html', {
         'report_form': report_form,
         'ticket_formset': ticket_formset,
         'expense_formset': expense_formset,
+        'is_edit': pk is not None
     })
 
 

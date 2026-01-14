@@ -11,7 +11,7 @@ def account_create(request):
         form = AccountForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('account_list')
+            return redirect('ledger:account_list')
     else:
         form = AccountForm()
     return render(request, 'ledger/account_form.html', {'form': form})
