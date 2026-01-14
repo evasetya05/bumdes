@@ -46,24 +46,41 @@ def prepare_journal_prefill(report: ParkingDailyReport):
 
     entries = []
 
-    def add_entry(account, debit, credit, note):
+    def add_entry(account, amount, note="", force_side=None):
+        if not account or amount <= 0:
+            return
+
+        balance_type = (account.balance_type or '').upper()
+        side = (force_side or balance_type or '').upper()
+
+        debit = Decimal('0')
+        credit = Decimal('0')
+
+        if side == 'CREDIT':
+            credit = amount
+        elif side == 'DEBIT':
+            debit = amount
+        else:
+            # fallback gunakan debit
+            debit = amount
+
         entries.append({
-            'account_id': account.id if account else None,
+            'account_id': account.id,
             'debit': float(debit),
             'credit': float(credit),
             'note': note or ""
         })
 
     if total_revenue > 0:
-        add_entry(cash_account, total_revenue, Decimal('0'), "Setoran pendapatan parkir")
+        add_entry(cash_account, total_revenue, "Setoran pendapatan parkir", force_side='DEBIT')
 
     for account, amount in revenue_map.items():
-        add_entry(account, Decimal('0'), amount, f"Pendapatan dari {report.date}")
+        add_entry(account, amount, f"Pendapatan dari {report.date}", force_side='CREDIT')
 
     if total_expense > 0:
         for account, amount, description in expense_entries:
-            add_entry(account, amount, Decimal('0'), description)
-        add_entry(cash_account, Decimal('0'), total_expense, "Pengeluaran operasional parkir")
+            add_entry(account, amount, description, force_side='DEBIT')
+        add_entry(cash_account, total_expense, "Pengeluaran operasional parkir", force_side='CREDIT')
 
     return {
         'entries': entries,

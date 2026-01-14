@@ -76,7 +76,7 @@
 
 <script src="{% static 'ledger/js/journal_entry.js' %}"></script>
 <script>
-    const prefillEntries = {{ prefill_entries|default:"[]"|safe }};
+    const prefillEntries = JSON.parse('{{ prefill_entries_json|escapejs }}');
     const entryTemplate = document.getElementById('entry-template');
 
     function createRow(data) {

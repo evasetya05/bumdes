@@ -51,7 +51,7 @@ def create_journal_entry(request):
             messages.success(request, f"Jurnal berhasil dibuat untuk periode {journal.period}.")
             if report_id:
                 return redirect('parkir:report_detail', pk=report_id)
-            return redirect('journal_list')
+            return redirect('ledger:journal_list')
 
         except ValueError as e:
             messages.error(request, str(e))
@@ -62,11 +62,12 @@ def create_journal_entry(request):
     prefill_date = prefill.get('date') if prefill else now().date().strftime('%Y-%m-%d')
     prefill_description = prefill.get('description', '') if prefill else ''
     prefill_report_id = prefill.get('report_id') if prefill else ''
+    prefill_entries_json = json.dumps(prefill_entries)
 
     context = {
         'today': now().date().strftime('%Y-%m-%d'),
         'accounts': Account.objects.all(),
-        'prefill_entries': prefill_entries,
+        'prefill_entries_json': prefill_entries_json,
         'prefill_date': prefill_date,
         'prefill_description': prefill_description,
         'prefill_report_id': prefill_report_id,
