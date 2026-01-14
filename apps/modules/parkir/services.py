@@ -6,15 +6,105 @@ from decimal import Decimal
 from apps.modules.ledger.models import JournalEntry, JournalItem, Account
 from .models import ParkingDailyReport, ParkingRevenueRule
 
+def get_default_cash_account():
+    cash_account = Account.objects.filter(coa_role_default__iexact='cash').first()
+    if cash_account:
+        return cash_account
+
+    cash_account = Account.objects.filter(account_type__iexact='ASSET').first()
+    if cash_account:
+        return cash_account
+
+    raise Account.DoesNotExist("Tidak menemukan akun kas (coa_role_default='cash' atau account_type='ASSET')")
+
+
+def prepare_journal_prefill(report: ParkingDailyReport):
+    cash_warning = None
+    try:
+        cash_account = get_default_cash_account()
+    except Account.DoesNotExist:
+        cash_account = None
+        cash_warning = "Akun kas default tidak ditemukan. Pilih akun kas secara manual sebelum menyimpan jurnal."
+
+    revenue_map = {}
+    for item in report.items.all():
+        amount = Decimal(item.subtotal() or 0)
+        if amount <= 0:
+            continue
+        revenue_map[item.revenue_account] = revenue_map.get(item.revenue_account, Decimal('0')) + amount
+
+    expense_entries = []
+    total_expense = Decimal('0')
+    for expense in report.expenses.all():
+        amount = Decimal(expense.amount or 0)
+        if amount <= 0:
+            continue
+        total_expense += amount
+        expense_entries.append((expense.expense_account, amount, expense.description))
+
+    total_revenue = sum(revenue_map.values(), Decimal('0'))
+
+    entries = []
+
+    def add_entry(account, debit, credit, note):
+        entries.append({
+            'account_id': account.id if account else None,
+            'debit': float(debit),
+            'credit': float(credit),
+            'note': note or ""
+        })
+
+    if total_revenue > 0:
+        add_entry(cash_account, total_revenue, Decimal('0'), "Setoran pendapatan parkir")
+
+    for account, amount in revenue_map.items():
+        add_entry(account, Decimal('0'), amount, f"Pendapatan dari {report.date}")
+
+    if total_expense > 0:
+        for account, amount, description in expense_entries:
+            add_entry(account, amount, Decimal('0'), description)
+        add_entry(cash_account, Decimal('0'), total_expense, "Pengeluaran operasional parkir")
+
+    return {
+        'entries': entries,
+        'cash_warning': cash_warning,
+        'total_revenue': float(total_revenue),
+        'total_expense': float(total_expense),
+    }
+
+
 def post_parking_daily_report(report_id):
-    report = ParkingDailyReport.objects.select_for_update().get(id=report_id)
-
-    if report.status == 'posted':
-        raise ValueError("Report sudah diposting")
-
     with transaction.atomic():
-        bruto = report.total_bruto()
-        total_expense = sum(e.amount for e in report.expenses.all())
+        report = ParkingDailyReport.objects.select_for_update().get(id=report_id)
+
+        if report.status == 'posted':
+            raise ValueError("Report sudah diposting")
+
+        bruto = Decimal(report.total_bruto() or 0)
+        if bruto <= 0:
+            raise ValueError("Total pendapatan (bruto) masih 0.")
+
+        cash_account = get_default_cash_account()
+
+        revenue_map = {}
+        for item in report.items.all():
+            amount = Decimal(item.subtotal() or 0)
+            if amount <= 0:
+                continue
+            revenue_map[item.revenue_account] = revenue_map.get(item.revenue_account, Decimal('0')) + amount
+
+        total_revenue = sum(revenue_map.values(), Decimal('0'))
+        if total_revenue <= 0:
+            raise ValueError("Tidak ada item pendapatan yang valid untuk diposting.")
+
+        total_expense = Decimal('0')
+        expense_entries = []
+        for expense in report.expenses.all():
+            amount = Decimal(expense.amount or 0)
+            if amount <= 0:
+                continue
+            total_expense += amount
+            expense_entries.append((expense.expense_account, amount, expense.description))
 
         # 1. Buat Journal Entry
         entry = JournalEntry.objects.create(
@@ -22,57 +112,45 @@ def post_parking_daily_report(report_id):
             description=f"Pendapatan Parkir {report.date}"
         )
 
-        # 2. Debit Kas
-        kas_account = Account.objects.get(code='1101')
+        # 2. Debit Kas untuk total pendapatan
         JournalItem.objects.create(
             journal_entry=entry,
-            account=kas_account,
-            debit=bruto - total_expense,
-            credit=0
+            account=cash_account,
+            debit=total_revenue,
+            credit=Decimal('0'),
+            note="Setoran pendapatan parkir"
         )
 
-        # 3. Kredit Pendapatan (Sesuai Akun di Item)
-        revenue_map = {}
-        for item in report.items.all():
-            acct = item.revenue_account
-            val = item.subtotal()
-            revenue_map[acct] = revenue_map.get(acct, 0) + val
-
+        # 3. Kredit Pendapatan sesuai akun
         for account, amount in revenue_map.items():
             JournalItem.objects.create(
                 journal_entry=entry,
                 account=account,
-                debit=0,
-                credit=amount
+                debit=Decimal('0'),
+                credit=amount,
+                note=f"Pendapatan dari {report.date}"
             )
 
-        # 3b. Debit Pengeluaran Operasional (Taken from Cash)
-        # Entry: Dr. Expense, Cr. (Imisitly matched by reduced Dr. Kas)
-        # Because Dr. Kas is (Rev - Exp). Total Dr = (Rev - Exp) + Exp = Rev.
-        # Total Cr = Rev. Balanced.
-        expense_map = {}
-        for exp in report.expenses.all():
-            acct = exp.expense_account
-            expense_map[acct] = expense_map.get(acct, 0) + exp.amount
-
-        for account, amount in expense_map.items():
-            JournalItem.objects.create(
-                journal_entry=entry,
-                account=account,
-                debit=amount,
-                credit=0
-            )
-
-        # 4. Pajak & Bagi Hasil
-        for rule in ParkingRevenueRule.objects.filter(is_active=True):
-            amount = bruto * (rule.percentage / Decimal('100'))
+        # 4. Catat pengeluaran operasional (Debit beban, Kredit Kas)
+        if total_expense > 0:
+            for account, amount, description in expense_entries:
+                JournalItem.objects.create(
+                    journal_entry=entry,
+                    account=account,
+                    debit=amount,
+                    credit=Decimal('0'),
+                    note=description or ""
+                )
 
             JournalItem.objects.create(
                 journal_entry=entry,
-                account=rule.account,
-                debit=0,
-                credit=amount
+                account=cash_account,
+                debit=Decimal('0'),
+                credit=total_expense,
+                note="Pengeluaran operasional parkir"
             )
+
+        # TODO: Tangani ParkingRevenueRule bila diperlukan (misalnya bagi hasil/pajak)
 
         # 5. Finalisasi
         report.status = 'posted'

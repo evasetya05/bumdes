@@ -78,10 +78,10 @@
         Edit Laporan</a>
 </div>
 
-<form method="post" action="{% url 'parkir:post_to_ledger' report.id %}">
+<form method="post" action="{% url 'parkir:report_create_journal' report.id %}">
     {% csrf_token %}
-    <button type="submit" onclick="return confirm('Yakin posting ke Ledger? Data tidak bisa diubah!')">
-        POST KE LEDGER
+    <button type="submit" onclick="return confirm('Buat draft jurnal untuk laporan ini?')">
+        BUAT JURNAL
     </button>
 </form>
 {% else %}

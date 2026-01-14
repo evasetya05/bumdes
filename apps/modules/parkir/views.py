@@ -12,7 +12,7 @@ from .models import (
     ParkingExpense,
     TicketType,
 )
-from .services import post_parking_daily_report
+from .services import post_parking_daily_report, prepare_journal_prefill
 from .forms import (
     ParkingDailyReportForm,
     TicketItemFormSet,
@@ -140,9 +140,31 @@ def post_to_ledger(request, pk):
         return redirect('parkir:report_detail', pk=pk)
 
     try:
-        post_parking_daily_report(report.id)
+        entry = post_parking_daily_report(report.id)
         messages.success(request, 'Berhasil diposting ke Ledger.')
+        return redirect('ledger:journal_list')
     except Exception as e:
         messages.error(request, f'Gagal posting: {e}')
+        return redirect('parkir:report_detail', pk=pk)
 
-    return redirect('parkir:report_detail', pk=pk)
+
+@login_required
+def report_create_journal(request, pk):
+    report = get_object_or_404(ParkingDailyReport, pk=pk)
+
+    prefill = prepare_journal_prefill(report)
+    session_data = {
+        'entries': prefill.get('entries', []),
+        'description': report.description or f"Laporan Parkir {report.date}",
+        'date': report.date.strftime('%Y-%m-%d'),
+        'report_id': report.id,
+    }
+
+    request.session['journal_prefill'] = session_data
+
+    if prefill.get('cash_warning'):
+        messages.warning(request, prefill['cash_warning'])
+
+    messages.info(request, 'Silakan periksa draft jurnal dan simpan untuk menyelesaikan posting.')
+
+    return redirect('ledger:create_journal_entry')

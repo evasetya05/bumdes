@@ -52,7 +52,7 @@ class ClosingPeriod(models.Model):
             print(f"⚠️ Periode {self.period} sudah ditutup.")
             return self
 
-        from ledger.models.journal_entry import JournalEntry  # hindari circular import
+        from apps.modules.ledger.models.journal_entry import JournalEntry  # hindari circular import
 
         # Ambil semua jurnal yang belum pernah di-close
         unposted_entries = JournalEntry.objects.filter(is_posted=False)

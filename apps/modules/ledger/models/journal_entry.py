@@ -9,7 +9,7 @@ class JournalEntry(models.Model):
     is_posted = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        from ledger.models.closing_period import ClosingPeriod
+        from apps.modules.ledger.models.closing_period import ClosingPeriod
 
         # 💡 Hanya isi period jika belum diset
         if not self.period:

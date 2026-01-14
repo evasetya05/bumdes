@@ -18,12 +18,12 @@
     <div class="form-header">
         <div class="form-group">
             <label for="id_date">📅 Tanggal Transaksi</label>
-            <input type="date" id="id_date" name="date" value="{{ today }}" required>
+            <input type="date" id="id_date" name="date" value="{{ prefill_date|default:today }}" required>
         </div>
 
         <div class="form-group">
             <label for="id_description">📝 Deskripsi Jurnal</label>
-            <textarea id="id_description" name="description" rows="3" placeholder="Tuliskan ringkasan transaksi..." required></textarea>
+            <textarea id="id_description" name="description" rows="3" placeholder="Tuliskan ringkasan transaksi..." required>{{ prefill_description }}</textarea>
         </div>
     </div>
 
@@ -40,9 +40,10 @@
             </tr>
         </thead>
         <tbody id="entries">
-            <tr class="entry">
+            <tr class="entry" id="entry-template" style="display: none;">
                 <td>
                     <select name="account_id[]">
+                        <option value="">--- Pilih Akun ---</option>
                         {% for account in accounts %}
                             <option value="{{ account.id }}">{{ account.account_name }}</option>
                         {% endfor %}
@@ -50,7 +51,6 @@
                 </td>
                 <td><input type="text" name="debit[]" value="" oninput="formatNumber(this)"></td>
                 <td><input type="text" name="credit[]" value="" oninput="formatNumber(this)"></td>
-
                 <td><input type="text" name="note[]" placeholder="Keterangan akun"></td>
                 <td><button type="button" onclick="removeEntry(this)">Hapus</button></td>
             </tr>
@@ -68,8 +68,57 @@
     <br>
     <button type="button" onclick="addEntry()">Tambah Baris</button>
     <button type="submit">Simpan Jurnal</button>
+
+    {% if prefill_report_id %}
+        <input type="hidden" name="report_id" value="{{ prefill_report_id }}">
+    {% endif %}
 </form>
 
 <script src="{% static 'ledger/js/journal_entry.js' %}"></script>
+<script>
+    const prefillEntries = {{ prefill_entries|default:"[]"|safe }};
+    const entryTemplate = document.getElementById('entry-template');
+
+    function createRow(data) {
+        const clone = entryTemplate.cloneNode(true);
+        clone.removeAttribute('id');
+        clone.style.display = '';
+
+        const select = clone.querySelector('select[name="account_id[]"]');
+        if (data.account_id) {
+            select.value = data.account_id;
+        }
+
+        const debitInput = clone.querySelector('input[name="debit[]"]');
+        const creditInput = clone.querySelector('input[name="credit[]"]');
+        const noteInput = clone.querySelector('input[name="note[]"]');
+
+        debitInput.value = data.debit ? Number(data.debit).toLocaleString('id-ID') : '';
+        creditInput.value = data.credit ? Number(data.credit).toLocaleString('id-ID') : '';
+        noteInput.value = data.note || '';
+
+        debitInput.addEventListener('input', () => formatNumber(debitInput));
+        creditInput.addEventListener('input', () => formatNumber(creditInput));
+
+        const removeButton = clone.querySelector('button');
+        removeButton.onclick = function () {
+            removeEntry(removeButton);
+        };
+
+        document.getElementById('entries').appendChild(clone);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('entries').innerHTML = '';
+
+        if (prefillEntries.length > 0) {
+            prefillEntries.forEach(entry => createRow(entry));
+        } else {
+            createRow({});
+        }
+
+        updateTotals();
+    });
+</script>
 </body>
 </html>

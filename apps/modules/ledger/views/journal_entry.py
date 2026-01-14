@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import get_object_or_404, render, redirect
 from apps.modules.ledger.models import JournalEntry, JournalItem, Account, ClosingPeriod
 from django.utils.timezone import now
@@ -10,6 +12,7 @@ def create_journal_entry(request):
             date_str = request.POST.get('date')
             date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else now().date()
             description = request.POST.get('description', '').strip()
+            report_id = request.POST.get('report_id')
 
             # Ambil periode open saat ini
             open_period = ClosingPeriod.get_open_period()
@@ -46,16 +49,30 @@ def create_journal_entry(request):
                 )
 
             messages.success(request, f"Jurnal berhasil dibuat untuk periode {journal.period}.")
+            if report_id:
+                return redirect('parkir:report_detail', pk=report_id)
             return redirect('journal_list')
 
         except ValueError as e:
             messages.error(request, str(e))
             return redirect('journal_list')
 
-    return render(request, 'ledger/journal_entry.html', {
-        'today': now().date(),
+    prefill = request.session.pop('journal_prefill', None)
+    prefill_entries = prefill.get('entries', []) if prefill else []
+    prefill_date = prefill.get('date') if prefill else now().date().strftime('%Y-%m-%d')
+    prefill_description = prefill.get('description', '') if prefill else ''
+    prefill_report_id = prefill.get('report_id') if prefill else ''
+
+    context = {
+        'today': now().date().strftime('%Y-%m-%d'),
         'accounts': Account.objects.all(),
-    })
+        'prefill_entries': prefill_entries,
+        'prefill_date': prefill_date,
+        'prefill_description': prefill_description,
+        'prefill_report_id': prefill_report_id,
+    }
+
+    return render(request, 'ledger/journal_entry.html', context)
 
 
 def journal_list(request):

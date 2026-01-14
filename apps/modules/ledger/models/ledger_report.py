@@ -1,8 +1,9 @@
 from django.shortcuts import render
-from ledger.models import Account, JournalItem
 from django.db.models import Sum
 from collections import defaultdict
 from decimal import Decimal
+
+from apps.modules.ledger.models import Account, JournalItem
 
 def ledger_report(request):
     accounts = Account.objects.all().order_by('account_name')
