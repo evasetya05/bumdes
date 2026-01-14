@@ -12,20 +12,26 @@
 
 <hr>
 
-<h3>Tiket</h3>
+<h3>Pendapatan</h3>
 <table border="1" cellpadding="6">
     <tr>
-        <th>Akun</th>
-        <th>Seri</th>
-        <th>Qty</th>
-        <th>Subtotal</th>
+        <th>Akun Pendapatan</th>
+        <th>Seri Awal</th>
+        <th>Seri Akhir</th>
+        <th>Lembar</th>
+        <th>Harga</th>
+        <th>Jumlah</th>
+        <th>Keterangan</th>
     </tr>
     {% for t in tickets %}
     <tr>
         <td>{{ t.revenue_account.account_name }}</td>
-        <td>{{ t.start_serial }} - {{ t.end_serial }}</td>
-        <td>{{ t.quantity }}</td>
+        <td>{{ t.start_serial }}</td>
+        <td>{{ t.end_serial }}</td>
+        <td>{{ t.lembar|default:"-" }}</td>
+        <td>{{ t.price|floatformat:0 }}</td>
         <td>{{ t.subtotal|floatformat:0 }}</td>
+        <td>{{ t.description|default:"-" }}</td>
     </tr>
     {% endfor %}
 </table>

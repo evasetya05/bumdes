@@ -55,7 +55,7 @@ class ParkingTicketItem(models.Model):
         return self.end_serial - self.start_serial + 1
 
     def subtotal(self):
-        return self.quantity() * self.price
+        return (self.lembar or 0) * self.price
 
 class ParkingExpense(models.Model):
     report = models.ForeignKey(
