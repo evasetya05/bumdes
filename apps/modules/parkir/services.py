@@ -19,14 +19,13 @@ def post_parking_daily_report(report_id):
         # 1. Buat Journal Entry
         entry = JournalEntry.objects.create(
             date=report.date,
-            description=f"Pendapatan Parkir {report.date}",
-            reference_id=f"PARK-{report.id}"
+            description=f"Pendapatan Parkir {report.date}"
         )
 
         # 2. Debit Kas
         kas_account = Account.objects.get(code='1101')
         JournalItem.objects.create(
-            entry=entry,
+            journal_entry=entry,
             account=kas_account,
             debit=bruto - total_expense,
             credit=0
@@ -41,7 +40,7 @@ def post_parking_daily_report(report_id):
 
         for account, amount in revenue_map.items():
             JournalItem.objects.create(
-                entry=entry,
+                journal_entry=entry,
                 account=account,
                 debit=0,
                 credit=amount
@@ -58,7 +57,7 @@ def post_parking_daily_report(report_id):
 
         for account, amount in expense_map.items():
             JournalItem.objects.create(
-                entry=entry,
+                journal_entry=entry,
                 account=account,
                 debit=amount,
                 credit=0
@@ -69,7 +68,7 @@ def post_parking_daily_report(report_id):
             amount = bruto * (rule.percentage / Decimal('100'))
 
             JournalItem.objects.create(
-                entry=entry,
+                journal_entry=entry,
                 account=rule.account,
                 debit=0,
                 credit=amount
@@ -77,7 +76,7 @@ def post_parking_daily_report(report_id):
 
         # 5. Finalisasi
         report.status = 'posted'
-        report.journal_entry = entry
+        report.journal_entry_id = entry.id
         report.posted_at = timezone.now()
         report.save()
 
