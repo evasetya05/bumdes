@@ -106,57 +106,70 @@
         {{ expense_formset.management_form }}
 
         <table border="1" cellpadding="5">
-            <tr>
-                <th>Akun Biaya</th>
-                <th>Keterangan</th>
-                <th>Persentase (%)</th>
-                <th>Unit</th>
-                <th>Nominal</th>
-                <th>Jumlah</th>
-                <th>Hapus</th>
-            </tr>
-            {% for form in expense_formset %}
-            <tr>
-                {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
-                <td>
-                    {{ form.expense_account }}
-                    {% if form.expense_account.errors %}<div style="color:red; font-size: 0.8em;">
-                        {{form.expense_account.errors }}</div>{% endif %}
-                </td>
-                <td>
-                    {{ form.description }}
-                    {% if form.description.errors %}<div style="color:red; font-size: 0.8em;">{{
-                        form.description.errors}}</div>{% endif %}
-                </td>
-                <td>
-                    {{ form.percentage }}
-                    {% if form.percentage.errors %}<div style="color:red; font-size: 0.8em;">{{ form.percentage.errors}}
-                    </div>{% endif %}
-                </td>
-                <td>
-                    {{ form.unit }}
-                    {% if form.unit.errors %}<div style="color:red; font-size: 0.8em;">{{ form.unit.errors }}</div>{%
-                    endif %}
-                </td>
-                <td>
-                    {{ form.nominal }}
-                    {% if form.nominal.errors %}<div style="color:red; font-size: 0.8em;">{{ form.nominal.errors }}
-                    </div>{% endif %}
-                </td>
-                <td>
-                    {{ form.amount }}
-                    {% if form.amount.errors %}<div style="color:red; font-size: 0.8em;">{{ form.amount.errors }}</div>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if expense_formset.can_delete %}
-                    {{ form.DELETE }}
-                    {% endif %}
-                    {% if form.non_field_errors %}<div style="color:red; font-size: 0.8em;">{{ form.non_field_errors }}
-                    </div>{% endif %}
-                </td>
-            </tr>
-            {% endfor %}
+            <thead>
+                <tr>
+                    <th>Akun Biaya</th>
+                    <th>Keterangan</th>
+                    <th>Persentase (%)</th>
+                    <th>Unit</th>
+                    <th>Nominal</th>
+                    <th>Jumlah</th>
+                    <th>Hapus</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in expense_formset %}
+                <tr>
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+                    <td>
+                        {{ form.expense_account }}
+                        {% if form.expense_account.errors %}
+                            <div style="color:red; font-size: 0.8em;">{{ form.expense_account.errors }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div style="color:red; font-size: 0.8em;">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ form.percentage }}
+                        {% if form.percentage.errors %}
+                            <div style="color:red; font-size: 0.8em;">{{ form.percentage.errors }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ form.unit }}
+                        {% if form.unit.errors %}
+                            <div style="color:red; font-size: 0.8em;">{{ form.unit.errors }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ form.nominal }}
+                        {% if form.nominal.errors %}
+                            <div style="color:red; font-size: 0.8em;">{{ form.nominal.errors }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ form.amount }}
+                        {% if form.amount.errors %}
+                            <div style="color:red; font-size: 0.8em;">{{ form.amount.errors }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if expense_formset.can_delete %}
+                            {{ form.DELETE }}
+                        {% endif %}
+                        {% if form.non_field_errors %}
+                            <div style="color:red; font-size: 0.8em;">{{ form.non_field_errors }}</div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
 
         <br>
