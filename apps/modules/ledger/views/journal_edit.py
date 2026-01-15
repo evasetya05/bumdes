@@ -40,7 +40,7 @@ def journal_edit(request, pk):
                 note=note or ''
             )
 
-        return redirect('journal_list')
+        return redirect('ledger:journal_list')
 
     return render(request, 'ledger/journal_edit.html', {
         'journal': journal,

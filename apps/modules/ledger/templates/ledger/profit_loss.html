@@ -11,25 +11,70 @@
 
 <h2>Laporan Laba Rugi</h2>
 
-<h2>Laporan Laba Rugi</h2>
-
+<!-- ========================= -->
+<!-- FORM FILTER -->
+<!-- ========================= -->
 <form method="get" class="period-form">
-    <label for="period">Periode (Closing):</label>
-    <select name="period" id="period">
-        {% for period in closing_periods %}
-            <option value="{{ period.period }}" {% if period.period == selected_period %}selected{% endif %}>
-                {{ period.period }}
-            </option>
-        {% endfor %}
-    </select>
-    <button type="submit">Tampilkan</button>
+
+    <!-- MODE -->
+    <label>
+        Mode:
+        <select name="mode" onchange="this.form.submit()">
+            <option value="period" {% if mode == 'period' %}selected{% endif %}>Bulanan</option>
+            <option value="year" {% if mode == 'year' %}selected{% endif %}>Tahunan</option>
+        </select>
+    </label>
+
+    <!-- PERIODE BULANAN -->
+    {% if mode == 'period' %}
+    <label>
+        Periode (Closing):
+        <select name="period" onchange="this.form.submit()">
+            {% for period in closing_periods %}
+                <option value="{{ period.period }}" {% if period.period == selected_period %}selected{% endif %}>
+                    {{ period.period }}
+                </option>
+            {% endfor %}
+        </select>
+    </label>
+    {% endif %}
+
+    <!-- TAHUN -->
+    {% if mode == 'year' %}
+    <label>
+        Tahun:
+        <select name="year" onchange="this.form.submit()">
+            {% for p in closing_periods %}
+                {% with y=p.period|slice:":4" %}
+                    <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>
+                        {{ y }}
+                    </option>
+                {% endwith %}
+            {% endfor %}
+        </select>
+    </label>
+    {% endif %}
+
 </form>
 
+<!-- ========================= -->
+<!-- INFO PERIODE -->
+<!-- ========================= -->
+<p style="margin: 10px 0;">
+    <strong>Ditampilkan:</strong>
+    {% if mode == 'year' %}
+        Tahun {{ selected_year }}
+    {% else %}
+        Periode {{ selected_period }}
+    {% endif %}
+</p>
 
 <!-- Wrapper horizontal -->
 <div class="profit-loss-container">
 
-    <!-- Bagian Pendapatan -->
+    <!-- ========================= -->
+    <!-- PENDAPATAN -->
+    <!-- ========================= -->
     <div class="profit-section">
         <h3>Pendapatan</h3>
         {% for data in income_data %}
@@ -66,11 +111,14 @@
         {% endfor %}
 
         <div class="total-summary">
-            Total Pendapatan: <strong>{{ total_income|floatformat:0|intcomma }}</strong>
+            Total Pendapatan:
+            <strong>{{ total_income|floatformat:0|intcomma }}</strong>
         </div>
     </div>
 
-    <!-- Bagian Pengeluaran -->
+    <!-- ========================= -->
+    <!-- BEBAN -->
+    <!-- ========================= -->
     <div class="profit-section">
         <h3>Pengeluaran</h3>
         {% for data in expense_data %}
@@ -107,14 +155,18 @@
         {% endfor %}
 
         <div class="total-summary">
-            Total Pengeluaran: <strong>{{ total_expense|floatformat:0|intcomma }}</strong>
+            Total Pengeluaran:
+            <strong>{{ total_expense|floatformat:0|intcomma }}</strong>
         </div>
     </div>
 </div>
 
-<!-- Bagian Laba Rugi Bersih -->
+<!-- ========================= -->
+<!-- LABA RUGI BERSIH -->
+<!-- ========================= -->
 <div class="net-income">
-    Laba / Rugi Bersih: <strong>{{ net_income|floatformat:0|intcomma }}</strong>
+    Laba / Rugi Bersih:
+    <strong>{{ net_income|floatformat:0|intcomma }}</strong>
 </div>
 
 </body>

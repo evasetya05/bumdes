@@ -141,16 +141,30 @@
 <div class="container">
   <h2>📅 Rasio Solvabilitas & Likuiditas</h2>
 
+  <!-- ================= FILTER ================= -->
   <form method="get">
-    <label><strong>Pilih Periode:</strong></label>
-    <select name="period" onchange="this.form.submit()">
-      {% for p in periods %}
-        <option value="{{ p.period }}" {% if p.period == period %}selected{% endif %}>{{ p.period }}</option>
-      {% endfor %}
+    <label><strong>Tipe Laporan:</strong></label>
+    <select name="mode" onchange="this.form.submit()">
+      <option value="period" {% if mode == "period" %}selected{% endif %}>Bulanan</option>
+      <option value="year" {% if mode == "year" %}selected{% endif %}>Tahunan</option>
     </select>
+
+    {% if mode == "year" %}
+      <label><strong>Tahun:</strong></label>
+      <input type="number" name="year" value="{{ year }}" min="2000" max="2100" onchange="this.form.submit()">
+    {% else %}
+      <label><strong>Periode:</strong></label>
+      <select name="period" onchange="this.form.submit()">
+        {% for p in periods %}
+          <option value="{{ p.period }}" {% if p.period == period %}selected{% endif %}>{{ p.period }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
   </form>
 
-  <p><strong>Periode Aktif:</strong> {{ period }}</p>
+  <p><strong>Periode Aktif:</strong>
+    {% if mode == "year" %}Tahun {{ year }}{% else %}{{ period }}{% endif %}
+  </p>
 
   <!-- Ringkasan Rasio -->
   <table class="main-table">

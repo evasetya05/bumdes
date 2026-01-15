@@ -54,9 +54,12 @@
     <!-- 🔽 Filter Periode -->
     <form method="get" class="row g-2 align-items-center mb-4">
         <div class="col-auto">
-            <label for="period" class="col-form-label fw-semibold">Periode:</label>
+            <select name="mode" id="mode" class="form-select fw-semibold" onchange="toggleFilter()">
+                <option value="period" {% if mode == 'period' %}selected{% endif %}>Laporan Bulanan</option>
+                <option value="year" {% if mode == 'year' %}selected{% endif %}>Laporan Tahunan</option>
+            </select>
         </div>
-        <div class="col-auto">
+        <div class="col-auto filter-period">
             <select name="period" id="period" class="form-select">
                 <option value="">-- Periode Open (Berjalan) --</option>
                 {% for p in closed_periods %}
@@ -66,6 +69,9 @@
                 {% endfor %}
             </select>
         </div>
+        <div class="col-auto filter-year" style="display: none;">
+            <input type="number" name="year" class="form-control" placeholder="Tahun (YYYY)" value="{{ selected_year|default:'' }}">
+        </div>
         <div class="col-auto">
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-search"></i> Tampilkan
@@ -74,7 +80,11 @@
     </form>
 
     <!-- 💬 Info Periode -->
-    {% if selected_period %}
+    {% if mode == 'year' and selected_year %}
+        <div class="alert alert-info border-start border-4 border-info shadow-sm">
+            <strong>Menampilkan transaksi untuk tahun: {{ selected_year }}</strong>
+        </div>
+    {% elif selected_period %}
         <div class="alert alert-info border-start border-4 border-info shadow-sm">
             <strong>Menampilkan transaksi untuk periode: {{ selected_period }}</strong>
         </div>
@@ -93,7 +103,11 @@
                     {{ data.account.account_code }} — {{ data.account.account_name }}
                 </h5>
                 <span class="badge bg-secondary">
-                    {{ selected_period|default:"Open Period" }}
+                    {% if mode == 'year' %}
+                        Tahun {{ selected_year }}
+                    {% else %}
+                        {{ selected_period|default:"Open Period" }}
+                    {% endif %}
                 </span>
             </div>
 
@@ -149,6 +163,20 @@
 
 <!-- ✅ Bootstrap JS (opsional, untuk dropdown dsb) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleFilter() {
+        const mode = document.getElementById('mode').value;
+        if (mode === 'year') {
+            document.querySelector('.filter-period').style.display = 'none';
+            document.querySelector('.filter-year').style.display = 'block';
+        } else {
+            document.querySelector('.filter-period').style.display = 'block';
+            document.querySelector('.filter-year').style.display = 'none';
+        }
+    }
+    // Jalankan saat load agar state sesuai
+    toggleFilter();
+</script>
 
 </body>
 </html>

@@ -1,14 +1,23 @@
 from django.shortcuts import render
 from django.db.models import Sum
-from apps.modules.ledger.models import Account, JournalItem, ClosingPeriod
+from ledger.models import Account, JournalItem, ClosingPeriod
 
 
-def calculate_balance(account, period=None):
-    """Hitung saldo akun berdasarkan periode (YYYY-MM)."""
-    items = JournalItem.objects.filter(account=account)
+# ==============================
+# HITUNG SALDO AKUN
+# ==============================
+def calculate_balance(account, period=None, year=None):
+    """
+    Hitung saldo akun:
+    - per periode (YYYY-MM)
+    - atau per tahun (YYYY)
+    """
 
-    if period:
-        # Filter berdasarkan periode di JournalEntry
+    items = JournalItem.objects.filter(account=account, journal_entry__is_posted=True)
+
+    if year:
+        items = items.filter(journal_entry__date__year=year)
+    elif period:
         items = items.filter(journal_entry__period=period)
 
     debit_total = items.aggregate(total=Sum('debit'))['total'] or 0
@@ -20,16 +29,30 @@ def calculate_balance(account, period=None):
         return credit_total - debit_total
 
 
+# ==============================
+# BALANCE SHEET VIEW
+# ==============================
 def balance_sheet_view(request):
-    # 🔹 Ambil semua periode dari ClosingPeriod
+
+    # ==========================
+    # PARAMETER
+    # ==========================
+    mode = request.GET.get('mode', 'period')   # 'period' | 'year'
+    selected_period = request.GET.get('period')
+    selected_year = request.GET.get('year')
+
+    # ==========================
+    # DATA PERIODE
+    # ==========================
     periods = ClosingPeriod.objects.all().order_by('-period')
 
-    # 🔹 Periode dipilih dari dropdown (GET ?period=YYYY-MM)
-    selected_period = request.GET.get('period')
-    if not selected_period and periods.exists():
-        selected_period = periods.first().period  # default: periode terbaru
+    if mode == 'period':
+        if not selected_period and periods.exists():
+            selected_period = periods.first().period
 
-    # 🔹 Ambil akun berdasarkan jenis
+    # ==========================
+    # AKUN
+    # ==========================
     asset_accounts = Account.objects.filter(account_type='ASSET', active=True)
     liability_accounts = Account.objects.filter(account_type='LIABILITY', active=True)
     equity_accounts = Account.objects.filter(account_type='CAPITAL', active=True)
@@ -37,27 +60,50 @@ def balance_sheet_view(request):
     assets, liabilities, equities = [], [], []
     total_assets = total_liabilities = total_equities = 0
 
-    # 🔹 Hitung aset
+    # ==========================
+    # HITUNG ASSET
+    # ==========================
     for acc in asset_accounts:
-        balance = calculate_balance(acc, selected_period)
+        balance = calculate_balance(
+            acc,
+            period=selected_period if mode == 'period' else None,
+            year=selected_year if mode == 'year' else None
+        )
         assets.append({'account': acc, 'balance': balance})
         total_assets += balance
 
-    # 🔹 Hitung kewajiban
+    # ==========================
+    # HITUNG LIABILITY
+    # ==========================
     for acc in liability_accounts:
-        balance = calculate_balance(acc, selected_period)
+        balance = calculate_balance(
+            acc,
+            period=selected_period if mode == 'period' else None,
+            year=selected_year if mode == 'year' else None
+        )
         liabilities.append({'account': acc, 'balance': balance})
         total_liabilities += balance
 
-    # 🔹 Hitung ekuitas
+    # ==========================
+    # HITUNG EQUITY
+    # ==========================
     for acc in equity_accounts:
-        balance = calculate_balance(acc, selected_period)
+        balance = calculate_balance(
+            acc,
+            period=selected_period if mode == 'period' else None,
+            year=selected_year if mode == 'year' else None
+        )
         equities.append({'account': acc, 'balance': balance})
         total_equities += balance
 
+    # ==========================
+    # CONTEXT
+    # ==========================
     context = {
+        'mode': mode,
         'periods': periods,
         'selected_period': selected_period,
+        'selected_year': selected_year,
         'assets': assets,
         'liabilities': liabilities,
         'equities': equities,

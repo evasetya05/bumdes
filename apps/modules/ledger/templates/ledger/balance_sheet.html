@@ -13,21 +13,67 @@
 
     <h2 class="mb-4">Laporan Neraca</h2>
 
-    <!-- Pilihan Periode Closing -->
-   <form method="get" class="mb-3">
-  <label for="period">Periode:</label>
-  <select name="period" id="period" onchange="this.form.submit()">
-    {% for p in periods %}
-      <option value="{{ p.period }}" {% if p.period == selected_period %}selected{% endif %}>
-        {{ p.period }} {% if p.is_closed %}(Closed){% else %}(Open){% endif %}
-      </option>
-    {% endfor %}
-  </select>
-</form>
+    <!-- ========================= -->
+    <!-- FORM FILTER -->
+    <!-- ========================= -->
+    <form method="get" class="row g-3 mb-3 align-items-end">
 
+        <!-- MODE -->
+        <div class="col-auto">
+            <label class="form-label">Mode</label>
+            <select name="mode" class="form-select" onchange="this.form.submit()">
+                <option value="period" {% if mode == 'period' %}selected{% endif %}>Bulanan</option>
+                <option value="year" {% if mode == 'year' %}selected{% endif %}>Tahunan</option>
+            </select>
+        </div>
 
-    <p><strong>Periode Ditampilkan:</strong> {{ selected_period }}</p>
+        <!-- PERIODE BULANAN -->
+        {% if mode == 'period' %}
+        <div class="col-auto">
+            <label class="form-label">Periode</label>
+            <select name="period" class="form-select" onchange="this.form.submit()">
+                {% for p in periods %}
+                    <option value="{{ p.period }}" {% if p.period == selected_period %}selected{% endif %}>
+                        {{ p.period }} {% if p.is_closed %}(Closed){% else %}(Open){% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
 
+        <!-- TAHUN -->
+        {% if mode == 'year' %}
+        <div class="col-auto">
+            <label class="form-label">Tahun</label>
+            <select name="year" class="form-select" onchange="this.form.submit()">
+                {% for p in periods %}
+                    {% with y=p.period|slice:":4" %}
+                        <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>
+                            {{ y }}
+                        </option>
+                    {% endwith %}
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+    </form>
+
+    <!-- ========================= -->
+    <!-- INFO PERIODE -->
+    <!-- ========================= -->
+    <p class="mb-4">
+        <strong>Ditampilkan:</strong>
+        {% if mode == 'year' %}
+            Tahun {{ selected_year }}
+        {% else %}
+            Periode {{ selected_period }}
+        {% endif %}
+    </p>
+
+    <!-- ========================= -->
+    <!-- TABEL NERACA -->
+    <!-- ========================= -->
     <div class="row">
         <div class="col-md-4">
             <h4>Aset</h4>
@@ -84,6 +130,9 @@
         </div>
     </div>
 
+    <!-- ========================= -->
+    <!-- VALIDASI NERACA -->
+    <!-- ========================= -->
     <div class="mt-4">
         <h5>Total Kewajiban + Ekuitas: {{ total_liabilities_equities|intcomma }}</h5>
         <h5>Total Aset: {{ total_assets|intcomma }}</h5>

@@ -18,7 +18,7 @@
     form {
       margin-bottom: 20px;
     }
-    select {
+    select, input {
       padding: 6px 10px;
       border-radius: 6px;
       border: 1px solid #ccc;
@@ -74,20 +74,43 @@
 </head>
 <body>
 
-<h2>📅 Rasio Profitabilitas</h2>
+<h2>📊 Rasio Profitabilitas</h2>
+
+<!-- ======================= -->
+<!-- 🔎 FILTER -->
 
 <form method="get">
-  <label><strong>Pilih Periode:</strong></label>
-  <select name="period" onchange="this.form.submit()">
-    {% for p in periods %}
-      <option value="{{ p.period }}" {% if p.period == periode %}selected{% endif %}>{{ p.period }}</option>
-    {% endfor %}
+  <label><strong>Mode Laporan:</strong></label>
+  <select name="mode" onchange="this.form.submit()">
+    <option value="period" {% if mode == "period" %}selected{% endif %}>Bulanan (Per Periode)</option>
+    <option value="year" {% if mode == "year" %}selected{% endif %}>Tahunan</option>
   </select>
+
+  {% if mode == "year" %}
+    &nbsp;&nbsp;
+    <label><strong>Tahun:</strong></label>
+    <input type="number" name="year" value="{{ tahun }}" min="2000" max="2100" onchange="this.form.submit()">
+  {% else %}
+    &nbsp;&nbsp;
+    <label><strong>Periode:</strong></label>
+    <select name="period" onchange="this.form.submit()">
+      {% for p in periods %}
+        <option value="{{ p.period }}" {% if p.period == periode %}selected{% endif %}>
+          {{ p.period }}
+        </option>
+      {% endfor %}
+    </select>
+  {% endif %}
 </form>
 
-<p><strong>Periode Aktif:</strong> {{ periode }}</p>
-
-
+<p>
+  <strong>Periode Aktif:</strong>
+  {% if mode == "year" %}
+    Tahun {{ tahun }}
+  {% else %}
+    {{ periode }}
+  {% endif %}
+</p>
 
 <!-- ======================= -->
 <!-- 📊 Ringkasan Rasio -->
@@ -109,7 +132,9 @@
 
 <!-- ======================= -->
 <!-- 📈 Detail Penjelasan -->
+
 <h3>📈 Detail Penjelasan Rasio</h3>
+
 {% for r in ratios %}
   <div class="ratio-section">
     <h4>{{ forloop.counter }}️⃣ {{ r.nama }}</h4>
@@ -121,13 +146,19 @@
       <div style="margin-left:12px; margin-top:8px;">
 
         {% if r.numerator.pendapatan %}
-          <h5>📘 Pendapatan (Subtotal)</h5>
+          <h5>📘 Pendapatan</h5>
           <table>
             <tr><th>Akun</th><th class="nilai-right">Saldo</th></tr>
             {% for a in r.numerator.pendapatan.rows %}
-              <tr><td>{{ a.nama }}</td><td class="nilai-right">{{ a.saldo|floatformat:2|intcomma }}</td></tr>
+              <tr>
+                <td>{{ a.nama }}</td>
+                <td class="nilai-right">{{ a.saldo|floatformat:2|intcomma }}</td>
+              </tr>
             {% endfor %}
-            <tr><td><strong>Total Pendapatan</strong></td><td class="nilai-right"><strong>{{ r.numerator.pendapatan.total|floatformat:2|intcomma }}</strong></td></tr>
+            <tr>
+              <td><strong>Total Pendapatan</strong></td>
+              <td class="nilai-right"><strong>{{ r.numerator.pendapatan.total|floatformat:2|intcomma }}</strong></td>
+            </tr>
           </table>
         {% endif %}
 
@@ -136,24 +167,36 @@
           <table>
             <tr><th>Akun</th><th class="nilai-right">Saldo</th></tr>
             {% for a in r.numerator.hpp.rows %}
-              <tr><td>{{ a.nama }}</td><td class="nilai-right">{{ a.saldo|floatformat:2|intcomma }}</td></tr>
+              <tr>
+                <td>{{ a.nama }}</td>
+                <td class="nilai-right">{{ a.saldo|floatformat:2|intcomma }}</td>
+              </tr>
             {% endfor %}
-            <tr><td><strong>Total HPP</strong></td><td class="nilai-right"><strong>{{ r.numerator.hpp.total|floatformat:2|intcomma }}</strong></td></tr>
+            <tr>
+              <td><strong>Total HPP</strong></td>
+              <td class="nilai-right"><strong>{{ r.numerator.hpp.total|floatformat:2|intcomma }}</strong></td>
+            </tr>
           </table>
         {% endif %}
 
         {% if r.numerator.biaya %}
-          <h5>📙 Biaya (Subtotal)</h5>
+          <h5>📙 Biaya</h5>
           <table>
             <tr><th>Akun</th><th class="nilai-right">Saldo</th></tr>
             {% for a in r.numerator.biaya.rows %}
-              <tr><td>{{ a.nama }}</td><td class="nilai-right">{{ a.saldo|floatformat:2|intcomma }}</td></tr>
+              <tr>
+                <td>{{ a.nama }}</td>
+                <td class="nilai-right">{{ a.saldo|floatformat:2|intcomma }}</td>
+              </tr>
             {% endfor %}
-            <tr><td><strong>Total Biaya</strong></td><td class="nilai-right"><strong>{{ r.numerator.biaya.total|floatformat:2|intcomma }}</strong></td></tr>
+            <tr>
+              <td><strong>Total Biaya</strong></td>
+              <td class="nilai-right"><strong>{{ r.numerator.biaya.total|floatformat:2|intcomma }}</strong></td>
+            </tr>
           </table>
         {% endif %}
 
-        <h5>📌 Nilai Bersih yang Dipakai</h5>
+        <h5>📌 Nilai Bersih</h5>
         {% if r.numerator.laba_kotor %}
           <p><strong>Laba Kotor:</strong> {{ r.numerator.laba_kotor.value|floatformat:2|intcomma }}</p>
         {% endif %}
@@ -161,13 +204,19 @@
           <p><strong>Laba Bersih:</strong> {{ r.numerator.laba_bersih.value|floatformat:2|intcomma }}</p>
         {% endif %}
 
-        <h5>📗 Komponen Penimbang (Denominator)</h5>
+        <h5>📗 Denominator</h5>
         <table>
           <tr><th>Akun</th><th class="nilai-right">Saldo</th></tr>
           {% for a in r.denominator.rows %}
-            <tr><td>{{ a.nama }}</td><td class="nilai-right">{{ a.saldo|floatformat:2|intcomma }}</td></tr>
+            <tr>
+              <td>{{ a.nama }}</td>
+              <td class="nilai-right">{{ a.saldo|floatformat:2|intcomma }}</td>
+            </tr>
           {% endfor %}
-          <tr><td><strong>Total</strong></td><td class="nilai-right"><strong>{{ r.denominator.total|floatformat:2|intcomma }}</strong></td></tr>
+          <tr>
+            <td><strong>Total</strong></td>
+            <td class="nilai-right"><strong>{{ r.denominator.total|floatformat:2|intcomma }}</strong></td>
+          </tr>
         </table>
 
       </div>
