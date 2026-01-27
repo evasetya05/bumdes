@@ -1,6 +1,6 @@
 from .base import *
 
-DEBUG = False
+DEBUG = True
 
 # URL configuration
 ROOT_URLCONF = 'bumdes.urls'
