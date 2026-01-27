@@ -5,14 +5,14 @@ DEBUG = False
 # URL configuration
 ROOT_URLCONF = 'bumdes.urls'
 
-ALLOWED_HOSTS = ['kdmpsumberoto.teknusa.com', 'www.kdmpsumberoto.teknusa.com']
-CSRF_TRUSTED_ORIGINS = ['https://kdmpsumberoto.teknusa.com', 'https://www.kdmpsumberoto.teknusa.com']
+ALLOWED_HOSTS = ['bumdessumberoto.teknusa.com', 'www.bumdessumberoto.teknusa.com']
+CSRF_TRUSTED_ORIGINS = ['https://bumdessumberoto.teknusa.com', 'https://www.bumdessumberoto.teknusa.com']
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'teknusas_kdmp',
-        'USER': 'teknusas_kdmp',
+        'NAME': 'teknusas_bumdes_sumberoto',
+        'USER': 'teknusas_bumdes_sumberoto',
         'PASSWORD': '@Sumberoto123',
         'HOST': '127.0.0.1',
         'PORT': '3306',
