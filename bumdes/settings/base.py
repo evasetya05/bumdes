@@ -15,8 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', '&9b7(-8cp5)mkz4j8kz*o_%njy944qn1p69ojdz35ui97)_ai8')
 
-ALLOWED_HOSTS = []
-CSRF_TRUSTED_ORIGINS = []
+
 
 INSTALLED_APPS = [
     'apps.accounts',
