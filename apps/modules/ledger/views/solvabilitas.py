@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.db.models import Sum
-from ledger.models import Account, JournalItem, ClosingPeriod
+from apps.modules.ledger.models import Account, JournalItem, ClosingPeriod
 
 
 def get_balance_by_prefix(prefixes, period=None, year=None):

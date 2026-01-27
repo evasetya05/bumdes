@@ -3,7 +3,7 @@ from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models import Sum, F, Value
 from django.db.models.functions import Coalesce
 
-from ledger.models import Account, JournalItem, ClosingPeriod
+from apps.modules.ledger.models import Account, JournalItem, ClosingPeriod
 
 
 def ledger_report(request):

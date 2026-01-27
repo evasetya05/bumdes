@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from ledger.models import Account, JournalItem, ClosingPeriod
+from apps.modules.ledger.models import Account, JournalItem, ClosingPeriod
 
 
 def profit_and_loss_report(request):
